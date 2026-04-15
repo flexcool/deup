@@ -1,0 +1,48 @@
+name: Build iOS IPA
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.16.9'
+
+      - name: Flutter version
+        run: flutter --version
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Install Pods
+        run: |
+          cd ios
+          pod install --repo-update
+
+      - name: Build iOS
+        run: flutter build ios --release --no-codesign
+
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/ios/iphoneos/Runner.app Payload/
+          zip -r deup.ipa Payload
+          ls -lh deup.ipa
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: iOS-IPA
+          path: deup.ipa
+          retention-days: 30
