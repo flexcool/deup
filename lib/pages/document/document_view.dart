@@ -78,12 +78,6 @@ class DocumentPage extends GetView<DocumentController> {
           : null,
       initialSettings: controller.options,
       onProgressChanged: controller.onProgressChanged,
-      onEnterFullscreen: (controller) {
-        this.controller.onEnterFullscreen(controller);
-      },
-      onExitFullscreen: (controller) {
-        this.controller.onExitFullscreen(controller);
-      },
       onReceivedServerTrustAuthRequest: (app, challenge) async {
         return ServerTrustAuthResponse(
           action: ServerTrustAuthResponseAction.PROCEED,
@@ -168,54 +162,54 @@ class DocumentPage extends GetView<DocumentController> {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => controller.isFullScreen.value
-          ? const SizedBox.shrink()  // 全屏时完全隐藏原视图
-          : CupertinoPageScaffold(
-              navigationBar: _buildNavigationBar(),
-              child: BottomBar(
-                width: Get.width,
-                hideOnScroll: true,
-                barColor: Colors.transparent,
-                child: Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      CupertinoButton(
-                        onPressed: () async {
-                          if (controller.currentIndex.value == 0) {
-                            SmartDialog.showToast('已经是第一个了');
-                            return;
-                          }
+      () => CupertinoPageScaffold(
+        navigationBar: _buildNavigationBar(),
+        child: (controller.object.value.options?.hideBtmBar ?? false)
+          ? _buildPageInfo()  // 隐藏 BottomBar，只显示页面内容
+          : BottomBar(
+          width: Get.width,
+          hideOnScroll: true,
+          barColor: Colors.transparent,
+          child: Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                CupertinoButton(
+                  onPressed: () async {
+                    if (controller.currentIndex.value == 0) {
+                      SmartDialog.showToast('已经是第一个了');
+                      return;
+                    }
 
-                          controller.currentIndex.value--;
-                          await controller.getObjectInfo(
-                              controller.objects[controller.currentIndex.value]);
-                        },
-                        padding: EdgeInsets.zero,
-                        child: Icon(CupertinoIcons.chevron_up, size: 70.sp),
-                      ),
-                      CupertinoButton(
-                        onPressed: () async {
-                          if (controller.currentIndex.value ==
-                              controller.objects.length - 1) {
-                            SmartDialog.showToast('已经是最后一个了');
-                            return;
-                          }
-
-                          controller.currentIndex.value++;
-                          await controller.getObjectInfo(
-                              controller.objects[controller.currentIndex.value]);
-                        },
-                        padding: EdgeInsets.zero,
-                        child: Icon(CupertinoIcons.chevron_down, size: 70.sp),
-                      ),
-                      SizedBox(width: 20.w),
-                    ],
-                  ),
+                    controller.currentIndex.value--;
+                    await controller.getObjectInfo(
+                        controller.objects[controller.currentIndex.value]);
+                  },
+                  padding: EdgeInsets.zero,
+                  child: Icon(CupertinoIcons.chevron_up, size: 70.sp),
                 ),
-                body: (context, controller) => Obx(() => _buildPageInfo()),
-              ),
+                CupertinoButton(
+                  onPressed: () async {
+                    if (controller.currentIndex.value ==
+                        controller.objects.length - 1) {
+                      SmartDialog.showToast('已经是最后一个了');
+                      return;
+                    }
+
+                    controller.currentIndex.value++;
+                    await controller.getObjectInfo(
+                        controller.objects[controller.currentIndex.value]);
+                  },
+                  padding: EdgeInsets.zero,
+                  child: Icon(CupertinoIcons.chevron_down, size: 70.sp),
+                ),
+                SizedBox(width: 20.w),
+              ],
             ),
+          ),
+          body: (context, controller) => Obx(() => _buildPageInfo()),
+        ),
+      ),
     );
   }
 }
