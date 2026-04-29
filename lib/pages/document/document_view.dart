@@ -78,6 +78,12 @@ class DocumentPage extends GetView<DocumentController> {
           : null,
       initialSettings: controller.options,
       onProgressChanged: controller.onProgressChanged,
+      onEnterFullscreen: (controller) {
+        this.controller.onEnterFullscreen(controller);
+      },
+      onExitFullscreen: (controller) {
+        this.controller.onExitFullscreen(controller);
+      },
       onReceivedServerTrustAuthRequest: (app, challenge) async {
         return ServerTrustAuthResponse(
           action: ServerTrustAuthResponseAction.PROCEED,
