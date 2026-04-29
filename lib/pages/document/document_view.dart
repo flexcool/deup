@@ -79,29 +79,6 @@ class DocumentPage extends GetView<DocumentController> {
           : null,
       initialSettings: controller.options,
       onProgressChanged: controller.onProgressChanged,
-      
-      // ✅ 新增：拦截全屏请求
-      onEnterFullscreen: (controller) async {
-        // 获取当前页面中的视频地址
-        final videoUrl = await controller.evaluateJavascript(source: '''
-          (function() {
-            var video = document.querySelector('video');
-            if (video && video.src) return video.src;
-            var source = video ? video.querySelector('source') : null;
-            return source ? source.src : null;
-          })();
-        ''');
-        
-        // 用系统默认播放器打开
-        if (videoUrl != null && videoUrl.isNotEmpty) {
-          await launchUrl(
-            Uri.parse(videoUrl),
-            mode: LaunchMode.externalApplication,
-          );
-        }
-        
-      },
-      
       onReceivedServerTrustAuthRequest: (app, challenge) async {
         return ServerTrustAuthResponse(
           action: ServerTrustAuthResponseAction.PROCEED,
