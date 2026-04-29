@@ -164,7 +164,7 @@ class DocumentPage extends GetView<DocumentController> {
     return Obx(
       () => CupertinoPageScaffold(
         navigationBar: _buildNavigationBar(),
-        child: BottomBar(
+        child: .hideBtmBar ? _buildPageInfo():BottomBar(
           width: Get.width,
           hideOnScroll: true,
           barColor: Colors.transparent,
