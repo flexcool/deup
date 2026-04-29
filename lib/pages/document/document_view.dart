@@ -100,8 +100,6 @@ class DocumentPage extends GetView<DocumentController> {
           );
         }
         
-        // 退出 WebView 的全屏模式
-        await controller.exitFullscreen();
       },
       
       onReceivedServerTrustAuthRequest: (app, challenge) async {
