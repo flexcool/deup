@@ -23,6 +23,7 @@ class DocumentController extends GetxController {
   final data = ''.obs;
   final objects = <ObjectModel>[].obs;
   final currentIndex = 0.obs;
+  final isFullScreen = false.obs; // WebView 全屏状态
 
   // 获取参数
   final String id = Get.arguments['id'] ?? '';
@@ -45,6 +46,7 @@ class DocumentController extends GetxController {
     allowUniversalAccessFromFileURLs: true,
     useHybridComposition: true,
     allowsInlineMediaPlayback: true,
+    allowsPictureInPictureMediaPlayback: true,
   );
 
   @override
@@ -117,6 +119,20 @@ class DocumentController extends GetxController {
   /// WebView 加载进度
   onProgressChanged(controller, p) {
     progress.value = p / 100;
+  }
+
+  /// 进入全屏
+  void onEnterFullscreen(InAppWebViewController controller) {
+    isFullScreen.value = true;
+    // 更新导航栏状态
+    update();
+  }
+
+  /// 退出全屏
+  void onExitFullscreen(InAppWebViewController controller) {
+    isFullScreen.value = false;
+    // 恢复导航栏状态
+    update();
   }
 
   @override
