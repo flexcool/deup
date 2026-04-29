@@ -168,11 +168,11 @@ class DocumentPage extends GetView<DocumentController> {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => CupertinoPageScaffold(
-        navigationBar: controller.isFullScreen.value ? null : _buildNavigationBar(),
-        child: controller.isFullScreen.value
-            ? _buildPageInfo()
-            : BottomBar(
+      () => controller.isFullScreen.value
+          ? const SizedBox.shrink()  // 全屏时完全隐藏原视图
+          : CupertinoPageScaffold(
+              navigationBar: _buildNavigationBar(),
+              child: BottomBar(
                 width: Get.width,
                 hideOnScroll: true,
                 barColor: Colors.transparent,
@@ -215,7 +215,7 @@ class DocumentPage extends GetView<DocumentController> {
                 ),
                 body: (context, controller) => Obx(() => _buildPageInfo()),
               ),
-      ),
+            ),
     );
   }
 }
