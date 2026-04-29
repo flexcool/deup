@@ -8,6 +8,7 @@ class OptionsModel {
 
   @JsonKey(name: 'icon') bool? icon;
   @JsonKey(name: 'hideNavBar') bool? hideNavBar;
+  @JsonKey(name: 'hideBtmBar') bool? hideBtmBar;
   @JsonKey(name: 'layout') String? layout;
   @JsonKey(name: 'pageSize') int? pageSize;
   
