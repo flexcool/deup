@@ -79,6 +79,31 @@ class DocumentPage extends GetView<DocumentController> {
           : null,
       initialSettings: controller.options,
       onProgressChanged: controller.onProgressChanged,
+      
+      // ✅ 新增：拦截全屏请求
+      onEnterFullscreen: (controller) async {
+        // 获取当前页面中的视频地址
+        final videoUrl = await controller.evaluateJavascript(source: '''
+          (function() {
+            var video = document.querySelector('video');
+            if (video && video.src) return video.src;
+            var source = video ? video.querySelector('source') : null;
+            return source ? source.src : null;
+          })();
+        ''');
+        
+        // 用系统默认播放器打开
+        if (videoUrl != null && videoUrl.isNotEmpty) {
+          await launchUrl(
+            Uri.parse(videoUrl),
+            mode: LaunchMode.externalApplication,
+          );
+        }
+        
+        // 退出 WebView 的全屏模式
+        await controller.exitFullscreen();
+      },
+      
       onReceivedServerTrustAuthRequest: (app, challenge) async {
         return ServerTrustAuthResponse(
           action: ServerTrustAuthResponseAction.PROCEED,
@@ -86,23 +111,14 @@ class DocumentPage extends GetView<DocumentController> {
       },
       shouldOverrideUrlLoading: (app, navigationAction) async {
         final uri = navigationAction.request.url!;
-        final urlStr = uri.toString().toLowerCase();
-          
-        // 拦截视频文件，用系统播放器打开
-        final videoExtensions = ['.mp4', '.m3u8', '.mov', '.avi', '.mkv', '.flv', '.wmv', '.webm'];
-        if (videoExtensions.any((ext) => urlStr.contains(ext))) {
-          if (await canLaunchUrl(uri)) {
-            await launchUrl(uri);
-            return NavigationActionPolicy.CANCEL;  // 取消 WebView 加载
-          }
-        }
-
+ 
         /// https://deup.io/plugins/add?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fdeup-io%2Fdeup%2Fmovies-tv.js
-        if (uri.host == "deup.io" && uri.path == "/plugins/add") {
+        if (uri.path == "/deupplugins/add") {
           final url = uri.queryParameters["url"];
           if (url != null) DeeplinkService.to.addPlugin(url);
           return NavigationActionPolicy.CANCEL;
         }
+        
         /// 过滤掉不需要跳转的链接
         if (!['http', 'https', 'file', 'chrome', 'data', 'javascript', 'about']
             .contains(uri.scheme)) {
