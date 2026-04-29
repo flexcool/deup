@@ -23,11 +23,6 @@ class DocumentController extends GetxController {
   final data = ''.obs;
   final objects = <ObjectModel>[].obs;
   final currentIndex = 0.obs;
-  final isFullScreen = false.obs; // WebView 全屏状态
-  
-  // 全屏 Overlay
-  OverlayEntry? _fullscreenOverlay;
-  InAppWebViewController? _webViewController;
 
   // 获取参数
   final String id = Get.arguments['id'] ?? '';
@@ -50,7 +45,6 @@ class DocumentController extends GetxController {
     allowUniversalAccessFromFileURLs: true,
     useHybridComposition: true,
     allowsInlineMediaPlayback: true,
-    allowsPictureInPictureMediaPlayback: true,
   );
 
   @override
@@ -123,52 +117,6 @@ class DocumentController extends GetxController {
   /// WebView 加载进度
   onProgressChanged(controller, p) {
     progress.value = p / 100;
-  }
-
-  /// 进入全屏
-  void onEnterFullscreen(InAppWebViewController controller) async {
-    _webViewController = controller;
-    isFullScreen.value = true;
-    
-    // 获取当前的 URL 和数据
-    final currentUrl = object.value.url ?? '';
-    final currentData = data.value;
-    final headers = ObjectHelper.getHeaders(object.value);
-    
-    // 创建全屏 Overlay
-    _fullscreenOverlay = OverlayEntry(
-      builder: (context) => Material(
-        color: Colors.black,
-        child: SafeArea(
-          child: InAppWebView(
-            key: webViewKey,
-            initialUrlRequest: currentData.isEmpty
-                ? URLRequest(
-                    url: WebUri(currentUrl),
-                    headers: headers,
-                  )
-                : null,
-            initialData: currentData.isNotEmpty
-                ? InAppWebViewInitialData(data: currentData)
-                : null,
-            initialSettings: options,
-            onExitFullscreen: (ctrl) => onExitFullscreen(ctrl),
-            onProgressChanged: onProgressChanged,
-          ),
-        ),
-      ),
-    );
-    
-    Overlay.of(Get.context!).insert(_fullscreenOverlay!);
-    update();
-  }
-
-  /// 退出全屏
-  void onExitFullscreen(InAppWebViewController controller) {
-    isFullScreen.value = false;
-    _fullscreenOverlay?.remove();
-    _fullscreenOverlay = null;
-    update();
   }
 
   @override
