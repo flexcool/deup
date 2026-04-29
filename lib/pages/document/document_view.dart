@@ -85,7 +85,23 @@ class DocumentPage extends GetView<DocumentController> {
       },
       shouldOverrideUrlLoading: (app, navigationAction) async {
         final uri = navigationAction.request.url!;
+        final urlStr = uri.toString().toLowerCase();
+          
+        // 拦截视频文件，用系统播放器打开
+        final videoExtensions = ['.mp4', '.m3u8', '.mov', '.avi', '.mkv', '.flv', '.wmv', '.webm'];
+        if (videoExtensions.any((ext) => urlStr.contains(ext))) {
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri);
+            return NavigationActionPolicy.CANCEL;  // 取消 WebView 加载
+          }
+        }
 
+        /// https://deup.io/plugins/add?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fdeup-io%2Fdeup%2Fmovies-tv.js
+        if (uri.host == "deup.io" && uri.path == "/plugins/add") {
+          final url = uri.queryParameters["url"];
+          if (url != null) DeeplinkService.to.addPlugin(url);
+          return NavigationActionPolicy.CANCEL;
+        }
         /// 过滤掉不需要跳转的链接
         if (!['http', 'https', 'file', 'chrome', 'data', 'javascript', 'about']
             .contains(uri.scheme)) {
