@@ -161,15 +161,10 @@ class DocumentPage extends GetView<DocumentController> {
 
   @override
   Widget build(BuildContext context) {
-    if (controller.object.value.options != null &&
-        controller.object.value.options!.hideBtmBar != null &&
-        controller.object.value.options!.hideBtmBar!) {
-      controller.object.value.options!.hideBtmBar = true;
-    }
     return Obx(
       () => CupertinoPageScaffold(
         navigationBar: _buildNavigationBar(),
-        child: controller.object.value.options!.hideBtmBar ? _buildPageInfo():BottomBar(
+        child: (controller.object.value.options?.hideBtmBar ?? false)  ? _buildPageInfo():BottomBar(
           width: Get.width,
           hideOnScroll: true,
           barColor: Colors.transparent,
