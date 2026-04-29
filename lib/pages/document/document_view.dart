@@ -16,6 +16,7 @@ import 'package:deup/common/index.dart';
 import 'package:deup/helper/index.dart';
 import 'package:deup/constants/index.dart';
 import 'package:deup/pages/document/document_controller.dart';
+import 'package:deup/services/index.dart';
 
 class DocumentPage extends GetView<DocumentController> {
   const DocumentPage({Key? key}) : super(key: key);
