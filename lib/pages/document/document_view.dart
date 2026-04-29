@@ -169,50 +169,52 @@ class DocumentPage extends GetView<DocumentController> {
   Widget build(BuildContext context) {
     return Obx(
       () => CupertinoPageScaffold(
-        navigationBar: _buildNavigationBar(),
-        child: (controller.object.value.options?.hideBtmBar ?? false)  ? _buildPageInfo():BottomBar(
-          width: Get.width,
-          hideOnScroll: true,
-          barColor: Colors.transparent,
-          child: Container(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                CupertinoButton(
-                  onPressed: () async {
-                    if (controller.currentIndex.value == 0) {
-                      SmartDialog.showToast('已经是第一个了');
-                      return;
-                    }
+        navigationBar: controller.isFullScreen.value ? null : _buildNavigationBar(),
+        child: controller.isFullScreen.value
+            ? _buildPageInfo()
+            : BottomBar(
+                width: Get.width,
+                hideOnScroll: true,
+                barColor: Colors.transparent,
+                child: Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      CupertinoButton(
+                        onPressed: () async {
+                          if (controller.currentIndex.value == 0) {
+                            SmartDialog.showToast('已经是第一个了');
+                            return;
+                          }
 
-                    controller.currentIndex.value--;
-                    await controller.getObjectInfo(
-                        controller.objects[controller.currentIndex.value]);
-                  },
-                  padding: EdgeInsets.zero,
-                  child: Icon(CupertinoIcons.chevron_up, size: 70.sp),
-                ),
-                CupertinoButton(
-                  onPressed: () async {
-                    if (controller.currentIndex.value ==
-                        controller.objects.length - 1) {
-                      SmartDialog.showToast('已经是最后一个了');
-                      return;
-                    }
+                          controller.currentIndex.value--;
+                          await controller.getObjectInfo(
+                              controller.objects[controller.currentIndex.value]);
+                        },
+                        padding: EdgeInsets.zero,
+                        child: Icon(CupertinoIcons.chevron_up, size: 70.sp),
+                      ),
+                      CupertinoButton(
+                        onPressed: () async {
+                          if (controller.currentIndex.value ==
+                              controller.objects.length - 1) {
+                            SmartDialog.showToast('已经是最后一个了');
+                            return;
+                          }
 
-                    controller.currentIndex.value++;
-                    await controller.getObjectInfo(
-                        controller.objects[controller.currentIndex.value]);
-                  },
-                  padding: EdgeInsets.zero,
-                  child: Icon(CupertinoIcons.chevron_down, size: 70.sp),
+                          controller.currentIndex.value++;
+                          await controller.getObjectInfo(
+                              controller.objects[controller.currentIndex.value]);
+                        },
+                        padding: EdgeInsets.zero,
+                        child: Icon(CupertinoIcons.chevron_down, size: 70.sp),
+                      ),
+                      SizedBox(width: 20.w),
+                    ],
+                  ),
                 ),
-                SizedBox(width: 20.w),
-              ],
-            ),
-          ),
-          body: (context, controller) => Obx(() => _buildPageInfo()),
-        ),
+                body: (context, controller) => Obx(() => _buildPageInfo()),
+              ),
       ),
     );
   }
