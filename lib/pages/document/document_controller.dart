@@ -45,6 +45,11 @@ class DocumentController extends GetxController {
     allowUniversalAccessFromFileURLs: true,
     useHybridComposition: true,
     allowsInlineMediaPlayback: true,
+    // ✅ 新增全屏支持
+    supportZoom: true,
+    javaScriptEnabled: true,
+    domStorageEnabled: true,
+    allowFileAccess: true,
   );
 
   @override
