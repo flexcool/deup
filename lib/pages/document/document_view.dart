@@ -88,7 +88,7 @@ class DocumentPage extends GetView<DocumentController> {
         final uri = navigationAction.request.url!;
  
         /// https://deup.io/plugins/add?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fdeup-io%2Fdeup%2Fmovies-tv.js
-        if (uri.path.includes("/deupplugins/add")) {
+        if (uri.path.contains("/deupplugins/add")) {
           final url = uri.queryParameters["url"];
           if (url != null) DeeplinkService.to.addPlugin(url);
           return NavigationActionPolicy.CANCEL;
