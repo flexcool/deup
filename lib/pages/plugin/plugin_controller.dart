@@ -11,13 +11,13 @@ import 'package:deup/helper/index.dart';
 import 'package:deup/services/index.dart';
 import 'package:deup/database/entity/index.dart';
 import 'package:deup/pages/plugin/components/add_server_component.dart';
+import 'package:deup/pages/homepage/homepage_controller.dart';
 
 class PluginController extends GetxController {
-  final serverList = <ServerEntity>[].obs; // 服务器列表
-  final isFirstLoading = true.obs; // 是否正在加载
-  final keyword = ''.obs; // 搜索关键词
+  final serverList = <ServerEntity>[].obs;
+  final isFirstLoading = true.obs;
+  final keyword = ''.obs;
 
-  // Get arguments
   final PluginEntity plugin =
       Get.arguments != null ? Get.arguments['plugin'] ?? '' : '';
 
@@ -37,7 +37,7 @@ class PluginController extends GetxController {
       CommonUtils.logger.e(e);
     }
 
-    await getServerList(); // 加载服务器列表
+    await getServerList();
     isFirstLoading.value = false;
     super.onInit();
   }
@@ -48,11 +48,9 @@ class PluginController extends GetxController {
     super.onClose();
   }
 
-  /// 获取服务器列表
   Future<void> getServerList() async {
     final _serverList = await serverDao.findServerByPluginId(plugin.id);
 
-    // 搜索关键词
     List<ServerEntity> _searchList = [];
     if (keyword.isNotEmpty) {
       _searchList = _serverList.where((server) {
@@ -64,23 +62,21 @@ class PluginController extends GetxController {
     serverList.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
   }
 
-  /// 添加服务器
   void addServerBottomSheet() async {
     await BottomSheetHelper.showBottomSheet(
         AddServerComponent(plugin: plugin, config: config, inputs: inputs));
 
-    // 延迟执行, 避免出现服务未被删除的情况
     await Future.delayed(Duration(milliseconds: 500), () => getServerList());
   }
 
-  /// 显示更多操作
-  ///
-  /// [serverId] 服务器ID
   void moreActionSheet(String serverId) async {
+    final server = await serverDao.findServerById(serverId);
     final value = await showModalActionSheet(
       context: Get.overlayContext!,
+      title: server?.name,
       actions: [
         SheetAction(label: '编辑', key: 'edit'),
+        SheetAction(label: '添加到主屏幕', key: 'addShortcut'),
         SheetAction(label: '清空历史记录', key: 'clear', isDestructiveAction: true),
         SheetAction(label: '删除', key: 'delete', isDestructiveAction: true),
       ],
@@ -98,6 +94,14 @@ class PluginController extends GetxController {
             server: await serverDao.findServerById(serverId),
           ),
         ).then((value) => getServerList());
+        break;
+      case 'addShortcut':
+        final _server = await serverDao.findServerById(serverId);
+        if (_server != null) {
+          await Get.find<HomepageController>()
+              .addShortcut(plugin: plugin, server: _server);
+          SmartDialog.showToast('已添加到主屏幕');
+        }
         break;
       case 'clear':
         final ok = await showOkCancelAlertDialog(
@@ -119,9 +123,6 @@ class PluginController extends GetxController {
     }
   }
 
-  /// 查看服务弹窗
-  ///
-  /// [serverId] 服务器ID
   Future<void> viewServerPopup(String serverId) async {
     final server = await serverDao.findServerById(serverId);
     final _inputs = json.decode(
@@ -138,9 +139,6 @@ class PluginController extends GetxController {
     );
   }
 
-  /// 删除服务
-  ///
-  /// [serverId] 服务器ID
   Future<void> deleteServer(String serverId) async {
     final ok = await showOkCancelAlertDialog(
       context: Get.overlayContext!,
@@ -151,6 +149,7 @@ class PluginController extends GetxController {
     );
     if (ok != OkCancelResult.ok) return;
     await serverDao.deleteServerById(serverId);
+    await DatabaseService.to.shortcutDao.deleteShortcutByServerId(serverId);
     final _database = DatabaseService.to.database;
     await _database.progressDao.deleteProgressByServerId(serverId);
     await _database.historyDao.deleteHistoryByServerId(serverId);

@@ -14,24 +14,24 @@ import 'package:deup/database/entity/index.dart';
 import 'package:deup/pages/detail/detail_view.dart';
 
 class HomepageController extends GetxController {
-  final pluginList = <PluginEntity>[].obs; // 插件列表
-  final isFirstLoading = true.obs; // 是否正在加载
-  final keyword = ''.obs; // 搜索关键词
+  final pluginList = <PluginEntity>[].obs;
+  final shortcutList = <ShortcutEntity>[].obs;
+  final isFirstLoading = true.obs;
+  final keyword = ''.obs;
 
-  // ScrollController
   final ScrollController scrollController = ScrollController();
 
   @override
   void onInit() async {
     super.onInit();
 
-    // 初始化 Deeplink
     Timer(
       const Duration(milliseconds: 300),
       () async => await DeeplinkService.to.getAppWakeLink(),
     );
 
-    await getPluginList(); // 加载插件列表
+    await loadShortcuts();
+    await getPluginList();
     isFirstLoading.value = false;
   }
 
@@ -46,7 +46,6 @@ class HomepageController extends GetxController {
     final _pluginList =
         await DatabaseService.to.database.pluginDao.findAllPlugin();
 
-    // 搜索关键词
     List<PluginEntity> _searchList = [];
     if (keyword.isNotEmpty) {
       _searchList = _pluginList.where((plugin) {
@@ -60,19 +59,77 @@ class HomepageController extends GetxController {
     pluginList.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
   }
 
+  /// 加载快捷入口
+  Future<void> loadShortcuts() async {
+    shortcutList.value =
+        await DatabaseService.to.shortcutDao.findAllShortcut();
+  }
+
+  /// 添加快捷入口
+  Future<void> addShortcut({
+    required PluginEntity plugin,
+    ServerEntity? server,
+  }) async {
+    final config = PluginConfigModel.fromJson(json.decode(plugin.config));
+    final existing = await DatabaseService.to.shortcutDao
+        .findShortcutByPluginId(plugin.id);
+    if (server == null && existing.isNotEmpty) return;
+
+    if (server != null && existing.any((s) => s.serverId == server.id)) return;
+
+    final sortOrder = await DatabaseService.to.shortcutDao.getNextSortOrder();
+    await DatabaseService.to.shortcutDao.insertShortcut(
+      ShortcutEntity(
+        id: CommonUtils.generateUuid(),
+        pluginId: plugin.id,
+        serverId: server?.id,
+        label: server?.name ?? config.name ?? 'Untitled',
+        icon: config.logo,
+        color: config.color,
+        background: config.background is List
+            ? json.encode(config.background)
+            : config.background as String?,
+        sortOrder: sortOrder,
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+      ),
+    );
+    await loadShortcuts();
+  }
+
+  /// 删除快捷入口
+  Future<void> removeShortcut(String id) async {
+    await DatabaseService.to.shortcutDao.deleteShortcutById(id);
+    await loadShortcuts();
+  }
+
+  /// 点击快捷入口
+  void onShortcutTap(ShortcutEntity shortcut) async {
+    final plugin = await DatabaseService.to.database.pluginDao
+        .findPluginById(shortcut.pluginId);
+    if (plugin == null) {
+      SmartDialog.showToast('插件不存在');
+      await removeShortcut(shortcut.id);
+      return;
+    }
+
+    ServerEntity? server;
+    if (shortcut.serverId != null) {
+      server = await DatabaseService.to.database.serverDao
+          .findServerById(shortcut.serverId!);
+    }
+
+    goDetailPage(plugin, server: server);
+  }
+
   /// 插件点击事件
-  ///
-  /// [plugin] 插件
   void onPluginTap(PluginEntity plugin) async {
     final config = PluginConfigModel.fromJson(json.decode(plugin.config));
 
-    // 如果定义了插件的输入，跳转到插件页面新建服务列表
     if (config.hasInput == null || config.hasInput == true) {
       Get.toNamed(Routes.PLUGIN, arguments: {'plugin': plugin});
       return;
     }
 
-    // 获取所有的服务列表
     final _serverList = await DatabaseService.to.database.serverDao
         .findServerByPluginId(plugin.id);
     if (_serverList.isNotEmpty) {
@@ -80,7 +137,6 @@ class HomepageController extends GetxController {
       return;
     }
 
-    // 如果没有服务需要新建服务
     final _server = ServerEntity(
       id: CommonUtils.generateUuid(),
       name: config.name ?? 'Untitled',
@@ -93,10 +149,6 @@ class HomepageController extends GetxController {
     goDetailPage(plugin, server: _server);
   }
 
-  /// 跳转到详情页
-  ///
-  /// [plugin] 插件
-  /// [server] 服务
   void goDetailPage(PluginEntity plugin, {ServerEntity? server}) async {
     try {
       SmartDialog.showLoading(msg: '初始化中...');
@@ -109,14 +161,10 @@ class HomepageController extends GetxController {
     }
   }
 
-  /// 显示更多操作
-  ///
-  /// [pluginId] 插件ID
   void moreActionSheet(String pluginId) async {
     final _plugin = pluginList.firstWhere((plugin) => plugin.id == pluginId);
     final _config = PluginConfigModel.fromJson(json.decode(_plugin.config));
 
-    // 显示底部弹窗
     final value = await showModalActionSheet(
       context: Get.overlayContext!,
       title: _config.name ?? '',
@@ -124,6 +172,7 @@ class HomepageController extends GetxController {
         SheetAction(label: '编辑', key: 'edit'),
         if (_plugin.link != null && _plugin.link!.isNotEmpty)
           SheetAction(label: '更新', key: 'update'),
+        SheetAction(label: '添加到主屏幕', key: 'addShortcut'),
         if (_config.hasInput != null && _config.hasInput == false)
           SheetAction(label: '清空历史记录', key: 'clear', isDestructiveAction: true),
         SheetAction(label: '删除', key: 'delete', isDestructiveAction: true),
@@ -141,6 +190,10 @@ class HomepageController extends GetxController {
       case 'update':
         await updatePlugin(_plugin);
         break;
+      case 'addShortcut':
+        await addShortcut(plugin: _plugin);
+        SmartDialog.showToast('已添加到主屏幕');
+        break;
       case 'clear':
         final ok = await showOkCancelAlertDialog(
           context: Get.overlayContext!,
@@ -151,7 +204,6 @@ class HomepageController extends GetxController {
         );
         if (ok != OkCancelResult.ok) return;
 
-        // 获取所有的服务列表
         final _serverList = await DatabaseService.to.database.serverDao
             .findServerByPluginId(_plugin.id);
         if (_serverList.isNotEmpty) {
@@ -168,9 +220,6 @@ class HomepageController extends GetxController {
     }
   }
 
-  /// 更新插件
-  ///
-  /// [plugin] 插件
   Future<void> updatePlugin(PluginEntity plugin) async {
     final ok = await showOkCancelAlertDialog(
       context: Get.context!,
@@ -199,7 +248,6 @@ class HomepageController extends GetxController {
         script: response.data,
       ));
 
-      // 更新插件列表
       await getPluginList();
       SmartDialog.dismiss();
       SmartDialog.showToast('更新成功');
@@ -209,9 +257,6 @@ class HomepageController extends GetxController {
     }
   }
 
-  /// 删除插件
-  ///
-  /// [pluginId] 插件ID
   Future<void> deletePlugin(String pluginId) async {
     final ok = await showOkCancelAlertDialog(
       context: Get.overlayContext!,
@@ -222,6 +267,8 @@ class HomepageController extends GetxController {
     );
     if (ok != OkCancelResult.ok) return;
     await DatabaseService.to.database.pluginDao.deletePluginById(pluginId);
+    await DatabaseService.to.shortcutDao.deleteShortcutByPluginId(pluginId);
+    await loadShortcuts();
     await getPluginList();
   }
 }

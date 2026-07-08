@@ -8,9 +8,11 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 import 'package:deup/common/index.dart';
+import 'package:deup/routes/app_pages.dart';
 import 'package:deup/services/index.dart';
 import 'package:deup/database/entity/index.dart';
 import 'package:deup/pages/homepage/homepage_controller.dart';
+import 'package:deup/pages/detail/detail_view.dart';
 
 class DeeplinkService extends GetxService {
   static DeeplinkService get to => Get.find();
@@ -22,13 +24,7 @@ class DeeplinkService extends GetxService {
         if (uri != null) {
           Timer(
             const Duration(milliseconds: 200),
-            () async {
-              // https://deup.io/plugins/add?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fdeup-io%2Fdeup%2Fmovies-tv.js
-              if (uri.path == '/plugins/add') {
-                final String? url = uri.queryParameters['url'];
-                if (url != null) addPlugin(url);
-              }
-            },
+            () async => _handleUri(uri),
           );
         }
       });
@@ -43,14 +39,70 @@ class DeeplinkService extends GetxService {
     try {
       final String? initialLink = await getInitialLink();
       if (initialLink != null) {
-        final Uri uri = Uri.parse(initialLink);
-        if (uri.path == '/plugins/add') {
-          final String? url = uri.queryParameters['url'];
-          if (url != null) addPlugin(url);
-        }
+        await _handleUri(Uri.parse(initialLink));
       }
     } on PlatformException {
     } on FormatException {}
+  }
+
+  /// Route incoming URI to the right handler
+  Future<void> _handleUri(Uri uri) async {
+    // https://deup.io/plugins/add?url=...
+    if (uri.host == 'deup.io' && uri.path == '/plugins/add') {
+      final String? url = uri.queryParameters['url'];
+      if (url != null) addPlugin(url);
+      return;
+    }
+
+    // Deup://addScript?url=...
+    if (uri.scheme == 'Deup' && uri.path == '/addScript') {
+      final String? url = uri.queryParameters['url'];
+      if (url != null) addPlugin(url);
+      return;
+    }
+
+    // Deup://run/{pluginId}  or  Deup://run/{pluginId}/{serverId}
+    if (uri.scheme == 'Deup' && uri.path.startsWith('/run/')) {
+      final segments = uri.pathSegments;
+      if (segments.length >= 2) {
+        final pluginId = segments[1];
+        final serverId = segments.length >= 3 ? segments[2] : null;
+        _runPlugin(pluginId, serverId);
+      }
+      return;
+    }
+  }
+
+  /// Execute plugin directly
+  Future<void> _runPlugin(String pluginId, String? serverId) async {
+    final plugin = await DatabaseService.to.database.pluginDao
+        .findPluginById(pluginId);
+    if (plugin == null) {
+      SmartDialog.showToast('插件不存在');
+      return;
+    }
+
+    try {
+      ServerEntity? server;
+      if (serverId != null) {
+        server = await DatabaseService.to.database.serverDao
+            .findServerById(serverId);
+      }
+
+      if (server == null) {
+        final servers = await DatabaseService.to.database.serverDao
+            .findServerByPluginId(pluginId);
+        if (servers.isNotEmpty) server = servers.first;
+      }
+
+      SmartDialog.showLoading(msg: '初始化中...');
+      await PluginRuntimeService.to.initialize(plugin.script, server: server);
+      SmartDialog.dismiss();
+      Get.to(() => DetailPage(), routeName: '${Routes.DETAIL}');
+    } catch (e) {
+      SmartDialog.dismiss();
+      SmartDialog.showToast('启动失败');
+    }
   }
 
   /// Add plugin
@@ -90,9 +142,10 @@ class DeeplinkService extends GetxService {
       if (ok != OkCancelResult.ok) return;
 
       final _now = DateTime.now().millisecondsSinceEpoch;
+      final pluginId = CommonUtils.generateUuid();
       await DatabaseService.to.database.pluginDao.insertPlugin(
         PluginEntity(
-          id: CommonUtils.generateUuid(),
+          id: pluginId,
           createdAt: _now,
           updatedAt: _now,
           config: json.encode(config),
@@ -104,7 +157,7 @@ class DeeplinkService extends GetxService {
 
       // 更新插件列表
       Get.find<HomepageController>().getPluginList();
-      SmartDialog.showToast('添加成功'); // 提示用户添加成功
+      SmartDialog.showToast('添加成功');
     } catch (e) {
       SmartDialog.dismiss();
       SmartDialog.showToast('添加失败');

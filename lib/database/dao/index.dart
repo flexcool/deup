@@ -4,3 +4,4 @@ export 'history_dao.dart';
 export 'storage_dao.dart';
 export 'download_dao.dart';
 export 'progress_dao.dart';
+export 'shortcut_dao.dart';

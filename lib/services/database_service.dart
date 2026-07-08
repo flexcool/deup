@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:floor/floor.dart';
 
 import 'package:deup/database/database.dart';
+import 'package:deup/database/dao/index.dart';
 
 // Database used floor
 class DatabaseService extends GetxService {
@@ -12,6 +13,10 @@ class DatabaseService extends GetxService {
   // AppDatabase
   late DeupDatabase _database;
   DeupDatabase get database => _database;
+
+  // ShortcutDao (raw SQL, no Floor codegen)
+  late ShortcutDao _shortcutDao;
+  ShortcutDao get shortcutDao => _shortcutDao;
 
   // Database name
   String name = 'deup_database.db';
@@ -31,6 +36,24 @@ class DatabaseService extends GetxService {
     _database = await $FloorDeupDatabase
         .databaseBuilder(name)
         .addMigrations([migration1to2]).build();
+
+    // Ensure shortcut table exists
+    await _database.database.execute(
+      'CREATE TABLE IF NOT EXISTS `shortcut` ('
+      '`id` TEXT NOT NULL,'
+      '`plugin_id` TEXT NOT NULL,'
+      '`server_id` TEXT,'
+      '`label` TEXT NOT NULL,'
+      '`icon` TEXT,'
+      '`color` TEXT,'
+      '`background` TEXT,'
+      '`sort_order` INTEGER NOT NULL DEFAULT 0,'
+      '`created_at` INTEGER NOT NULL,'
+      'PRIMARY KEY (`id`)'
+      ')',
+    );
+
+    _shortcutDao = ShortcutDao();
 
     return this;
   }
