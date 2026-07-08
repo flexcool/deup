@@ -84,6 +84,7 @@ class _AddServerComponentState extends State<AddServerComponent> {
           .deleteStorageByServerId(_server.id);
     }
 
+    _nameController.dispose();
     super.dispose();
   }
 

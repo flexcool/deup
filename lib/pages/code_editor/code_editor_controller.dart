@@ -118,4 +118,10 @@ class CodeEditorController extends GetxController {
       SmartDialog.showToast('更新失败');
     }
   }
+
+  @override
+  void onClose() {
+    focusNode.dispose();
+    super.onClose();
+  }
 }

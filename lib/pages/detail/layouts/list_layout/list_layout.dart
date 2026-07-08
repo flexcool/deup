@@ -76,6 +76,7 @@ class _ListLayoutState extends State<ListLayout> {
   @override
   void dispose() {
     scrollController.dispose();
+    searchController.dispose();
     super.dispose();
   }
 

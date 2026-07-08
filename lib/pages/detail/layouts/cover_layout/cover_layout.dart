@@ -76,6 +76,7 @@ class _CoverLayoutState extends State<CoverLayout> {
   @override
   void dispose() {
     scrollController.dispose();
+    searchController.dispose();
     super.dispose();
   }
 

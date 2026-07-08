@@ -42,6 +42,12 @@ class PluginController extends GetxController {
     super.onInit();
   }
 
+  @override
+  void onClose() {
+    scrollController.dispose();
+    super.onClose();
+  }
+
   /// 获取服务器列表
   Future<void> getServerList() async {
     final _serverList = await serverDao.findServerByPluginId(plugin.id);

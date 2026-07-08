@@ -197,6 +197,7 @@ class DownloadController extends GetxController {
 
   @override
   void onClose() {
+    scrollController.dispose();
     DownloadService.to.unbindBackgroundIsolate();
     super.onClose();
   }

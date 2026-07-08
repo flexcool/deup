@@ -35,6 +35,12 @@ class HomepageController extends GetxController {
     isFirstLoading.value = false;
   }
 
+  @override
+  void onClose() {
+    scrollController.dispose();
+    super.onClose();
+  }
+
   /// 获取插件列表
   Future<void> getPluginList() async {
     final _pluginList =

@@ -88,6 +88,7 @@ class _ImageLayoutState extends State<ImageLayout> {
   @override
   void dispose() {
     scrollController.dispose();
+    searchController.dispose();
     super.dispose();
   }
 

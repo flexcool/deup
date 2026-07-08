@@ -76,6 +76,7 @@ class _GridLayoutState extends State<GridLayout> {
   @override
   void dispose() {
     scrollController.dispose();
+    searchController.dispose();
     super.dispose();
   }
 

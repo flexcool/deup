@@ -38,6 +38,12 @@ class ImagePreviewController extends GetxController {
     pageController = PageController(initialPage: currentIndex.value);
   }
 
+  @override
+  void onClose() {
+    pageController.dispose();
+    super.onClose();
+  }
+
   /// 页面切换
   /// [index] 当前页面索引
   void onPageChanged(int index) {
