@@ -172,11 +172,13 @@ class _FunctionEditorPageState extends State<_FunctionEditorPage> {
         backgroundColor: CommonUtils.backgroundColor,
         border: Border.all(width: 0, color: Colors.transparent),
         leading: CupertinoButton(
+          padding: EdgeInsets.zero,
           child: Text('取消'),
           onPressed: () => Get.back(),
         ),
         middle: Text(widget.id == null ? '新建函数' : '编辑函数'),
         trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
           child: Text('保存'),
           onPressed: _save,
         ),
@@ -217,7 +219,7 @@ class _FunctionEditorPageState extends State<_FunctionEditorPage> {
                   padding: EdgeInsets.all(12.w),
                   style: TextStyle(
                     fontFamily: 'monospace',
-                    fontSize: 14.sp,
+                    fontSize: 16,
                   ),
                 ),
               ),
