@@ -36,8 +36,9 @@ class CustomFunctionsPage extends GetView<CustomFunctionsController> {
     final codeController = TextEditingController(text: code ?? '');
     final formKey = GlobalKey<FormState>();
 
-    final result = await showCupertinoModalBottomSheet<bool>(
+    final result = await showModalBottomSheet<bool>(
       context: Get.overlayContext!,
+      isScrollControlled: true,
       builder: (context) {
         return Padding(
           padding: EdgeInsets.only(
