@@ -160,22 +160,20 @@ class Homepage extends GetView<HomepageController> {
     return Obx(() {
       final shortcuts = controller.shortcutList;
       if (shortcuts.isEmpty) return SizedBox.shrink();
-      return SliverToBoxAdapter(
-        child: Padding(
-          padding: EdgeInsets.only(
-            top: 20.h,
-            bottom: 10.h,
-            left: CommonUtils.isPad ? 25 : 50.w,
-          ),
-          child: SizedBox(
-            height: CommonUtils.isPad ? 120 : 210.h,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: shortcuts.length,
-              separatorBuilder: (_, __) => SizedBox(width: 10.w),
-              itemBuilder: (context, index) =>
-                  _buildShortcutIcon(shortcuts[index]),
-            ),
+      return Padding(
+        padding: EdgeInsets.only(
+          top: 20.h,
+          bottom: 10.h,
+          left: CommonUtils.isPad ? 25 : 50.w,
+        ),
+        child: SizedBox(
+          height: CommonUtils.isPad ? 120 : 210.h,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: shortcuts.length,
+            separatorBuilder: (_, __) => SizedBox(width: 10.w),
+            itemBuilder: (context, index) =>
+                _buildShortcutIcon(shortcuts[index]),
           ),
         ),
       );
@@ -226,7 +224,7 @@ class Homepage extends GetView<HomepageController> {
             await Future.delayed(Duration(seconds: 1));
           },
         ),
-        _buildShortcutSection(),
+        SliverToBoxAdapter(child: _buildShortcutSection()),
         SliverPadding(
           padding:
               EdgeInsets.symmetric(horizontal: CommonUtils.isPad ? 25 : 50.w)
