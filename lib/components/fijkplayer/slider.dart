@@ -111,7 +111,10 @@ class NewFijkSliderColors {
       identical(this, other) ||
       other is NewFijkSliderColors &&
           runtimeType == other.runtimeType &&
-          hashCode == other.hashCode;
+          playedColor == other.playedColor &&
+          bufferedColor == other.bufferedColor &&
+          cursorColor == other.cursorColor &&
+          baselineColor == other.baselineColor;
 
   @override
   int get hashCode =>
@@ -192,7 +195,11 @@ class _SliderPainter extends CustomPainter {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is _SliderPainter && hashCode == other.hashCode;
+      other is _SliderPainter &&
+          v == other.v &&
+          cv == other.cv &&
+          dragging == other.dragging &&
+          colors == other.colors;
 
   @override
   int get hashCode => hashValues(v, cv, dragging, colors);
