@@ -104,13 +104,39 @@ class HomepageController extends GetxController {
       return;
     }
 
-    ServerEntity? server;
+    final config = PluginConfigModel.fromJson(json.decode(plugin.config));
+
+    // If shortcut has a specific server, use it directly
     if (shortcut.serverId != null) {
-      server = await DatabaseService.to.database.serverDao
+      final server = await DatabaseService.to.database.serverDao
           .findServerById(shortcut.serverId!);
+      goDetailPage(plugin, server: server);
+      return;
     }
 
-    goDetailPage(plugin, server: server);
+    // No server saved — follow same logic as onPluginTap
+    if (config.hasInput == null || config.hasInput == true) {
+      Get.toNamed(Routes.PLUGIN, arguments: {'plugin': plugin});
+      return;
+    }
+
+    final _serverList = await DatabaseService.to.database.serverDao
+        .findServerByPluginId(plugin.id);
+    if (_serverList.isNotEmpty) {
+      goDetailPage(plugin, server: _serverList.first);
+      return;
+    }
+
+    final _server = ServerEntity(
+      id: CommonUtils.generateUuid(),
+      name: config.name ?? 'Untitled',
+      pluginId: plugin.id,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
+    );
+
+    await DatabaseService.to.database.serverDao.insertServer(_server);
+    goDetailPage(plugin, server: _server);
   }
 
   void onPluginTap(PluginEntity plugin) async {
