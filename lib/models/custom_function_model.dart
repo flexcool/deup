@@ -88,4 +88,8 @@ class CustomFunctionService {
         .map((f) => '${f.code}\n\$custom.${f.name} = ${f.name};')
         .join('\n\n');
   }
+
+  void clear() {
+    _box.remove(_key);
+  }
 }
