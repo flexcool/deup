@@ -32,105 +32,137 @@ class CustomFunctionsPage extends GetView<CustomFunctionsController> {
   }
 
   Future<void> _showEditorDialog({String? id, String? name, String? code}) async {
-    final nameController = TextEditingController(text: name ?? '');
-    final codeController = TextEditingController(text: code ?? '');
-
-    final result = await showModalBottomSheet<bool>(
-      context: Get.overlayContext!,
-      isScrollControlled: true,
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: SingleChildScrollView(
-              padding: EdgeInsets.all(16.w),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      CupertinoButton(
-                        child: Text('取消'),
-                        onPressed: () => Navigator.of(context).pop(false),
-                      ),
-                      Text(
-                        id == null ? '新建函数' : '编辑函数',
-                        style: Get.textTheme.bodyLarge,
-                      ),
-                      CupertinoButton(
-                        child: Text('保存'),
-                        onPressed: () => Navigator.of(context).pop(true),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8.h),
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: CupertinoColors.systemGrey4),
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: CupertinoTextField(
-                      controller: nameController,
-                      placeholder: '函数名称',
-                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-                  Text('函数代码', style: Get.textTheme.bodySmall),
-                  SizedBox(height: 8.h),
-                  Container(
-                    height: 300.h,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: CupertinoColors.systemGrey4),
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: CupertinoTextField(
-                      controller: codeController,
-                      placeholder: 'function myFunc(args) {\n  return args;\n}',
-                      maxLines: null,
-                      expands: true,
-                      textAlignVertical: TextAlignVertical.top,
-                      padding: EdgeInsets.all(12.w),
-                      style: TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 13.sp,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 12.h),
-                  Text(
-                    '函数挂载在 \$custom 命名空间下，脚本中通过 \$custom.函数名() 调用。',
-                    style: Get.textTheme.bodySmall?.copyWith(color: Colors.grey),
-                  ),
-                  SizedBox(height: 24.h),
-                ],
-              ),
-            ),
-          );
-      },
+    await Get.to(
+      () => _FunctionEditorPage(
+        id: id,
+        initialName: name,
+        initialCode: code,
+      ),
+      fullscreenDialog: true,
     );
+  }
+}
 
-    if (result == true) {
-      final n = nameController.text.trim();
-      final c = codeController.text.trim();
-      if (n.isEmpty) {
-        SmartDialog.showToast('请输入函数名称');
-        return;
-      }
-      if (c.isEmpty) {
-        SmartDialog.showToast('请输入函数代码');
-        return;
-      }
+class _FunctionEditorPage extends StatefulWidget {
+  final String? id;
+  final String? initialName;
+  final String? initialCode;
 
-      if (id != null) {
-        await controller.updateFunction(id, n, c);
-      } else {
-        await controller.addFunction(n, c);
-      }
+  const _FunctionEditorPage({
+    this.id,
+    this.initialName,
+    this.initialCode,
+  });
+
+  @override
+  State<_FunctionEditorPage> createState() => _FunctionEditorPageState();
+}
+
+class _FunctionEditorPageState extends State<_FunctionEditorPage> {
+  late TextEditingController _nameController;
+  late TextEditingController _codeController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.initialName ?? '');
+    _codeController = TextEditingController(text: widget.initialCode ?? '');
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _codeController.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final name = _nameController.text.trim();
+    final code = _codeController.text.trim();
+    if (name.isEmpty) {
+      SmartDialog.showToast('请输入函数名称');
+      return;
     }
+    if (code.isEmpty) {
+      SmartDialog.showToast('请输入函数代码');
+      return;
+    }
+
+    final controller = Get.find<CustomFunctionsController>();
+    if (widget.id != null) {
+      controller.updateFunction(widget.id!, name, code);
+    } else {
+      controller.addFunction(name, code);
+    }
+    Get.back();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        backgroundColor: CommonUtils.backgroundColor,
+        border: Border.all(width: 0, color: Colors.transparent),
+        leading: CupertinoButton(
+          child: Text('取消'),
+          onPressed: () => Get.back(),
+        ),
+        middle: Text(widget.id == null ? '新建函数' : '编辑函数'),
+        trailing: CupertinoButton(
+          child: Text('保存'),
+          onPressed: _save,
+        ),
+      ),
+      backgroundColor: CommonUtils.backgroundColor,
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(16.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: CupertinoColors.systemGrey4),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: CupertinoTextField(
+                  controller: _nameController,
+                  placeholder: '函数名称',
+                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                ),
+              ),
+              SizedBox(height: 16.h),
+              Text('函数代码', style: Get.textTheme.bodySmall),
+              SizedBox(height: 8.h),
+              Container(
+                height: 400.h,
+                decoration: BoxDecoration(
+                  border: Border.all(color: CupertinoColors.systemGrey4),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: CupertinoTextField(
+                  controller: _codeController,
+                  placeholder: 'function myFunc(args) {\n  return args;\n}',
+                  maxLines: null,
+                  expands: true,
+                  textAlignVertical: TextAlignVertical.top,
+                  padding: EdgeInsets.all(12.w),
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 14.sp,
+                  ),
+                ),
+              ),
+              SizedBox(height: 12.h),
+              Text(
+                '函数挂载在 \$custom 命名空间下，脚本中通过 \$custom.函数名() 调用。',
+                style: Get.textTheme.bodySmall?.copyWith(color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
