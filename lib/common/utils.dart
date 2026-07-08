@@ -102,7 +102,7 @@ class CommonUtils {
   /// [min] 最小值
   /// [max] 最大值
   static randomInt(int min, int max) {
-    return min + (max - min) * (Random().nextDouble());
+    return (min + (max - min) * Random().nextDouble()).toInt();
   }
 
   /// 格式化 ijk track 信息

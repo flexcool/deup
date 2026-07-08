@@ -36,7 +36,7 @@ class AudioPlayerController extends GetxController
   final audioHandler = PlayerNotificationService.to.audioHandler;
   late TabController tabController;
 
-  double seekPos = -1.0.obs;
+  double seekPos = -1.0;
   final isPlaying = false.obs;
   final duration = Duration().obs;
   final currentPos = Duration().obs;

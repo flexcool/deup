@@ -149,25 +149,6 @@ class DocumentPage extends GetView<DocumentController> {
         ),
       );
 
-      // WebView 类型 - 使用 Expanded 确保全屏布局
-      return Column(
-        children: [
-          Expanded(
-            child: Stack(
-              children: [
-                _buildInAppWebView(),
-                if (controller.progress.value < 1.0)
-                  LinearProgressIndicator(
-                    value: controller.progress.value,
-                    backgroundColor: Colors.transparent,
-                    minHeight: 2,
-                  ),
-              ],
-            ),
-          ),
-        ],
-      );
-      
     }
 
     // PDF
