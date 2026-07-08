@@ -12,6 +12,7 @@ import 'package:deup/pages/document/document_view.dart';
 import 'package:deup/pages/setting/about/about_view.dart';
 import 'package:deup/pages/code_editor/code_editor_view.dart';
 import 'package:deup/pages/setting/download/download_view.dart';
+import 'package:deup/pages/setting/custom_functions/custom_functions_view.dart';
 import 'package:deup/pages/audio_player/audio_player_view.dart';
 import 'package:deup/pages/video_player/video_player_view.dart';
 import 'package:deup/pages/image_preview/image_preview_view.dart';
@@ -26,6 +27,7 @@ import 'package:deup/pages/document/document_binding.dart';
 import 'package:deup/pages/setting/about/about_binding.dart';
 import 'package:deup/pages/code_editor/code_editor_binding.dart';
 import 'package:deup/pages/setting/download/download_binding.dart';
+import 'package:deup/pages/setting/custom_functions/custom_functions_binding.dart';
 import 'package:deup/pages/audio_player/audio_player_binding.dart';
 import 'package:deup/pages/video_player/video_player_binding.dart';
 import 'package:deup/pages/image_preview/image_preview_binding.dart';
@@ -110,6 +112,11 @@ class AppPages {
           name: _Paths.DOWNLOAD,
           page: () => DownloadPage(),
           binding: DownloadBinding(),
+        ),
+        GetPage(
+          name: _Paths.FUNCTIONS,
+          page: () => CustomFunctionsPage(),
+          binding: CustomFunctionsBinding(),
         ),
       ],
     ),

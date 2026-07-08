@@ -5,3 +5,4 @@ export 'plugin/input.dart' ;
 export 'object.dart' ; 
 export 'cookie_options.dart' ; 
 export 'shortcut_model.dart' ; 
+export 'custom_function_model.dart' ; 

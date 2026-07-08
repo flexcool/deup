@@ -22,6 +22,7 @@ abstract class Routes {
   static const SETTING = _Paths.SETTING;
   static const SETTING_ABOUT = _Paths.SETTING + _Paths.ABOUT;
   static const SETTING_DOWNLOAD = _Paths.SETTING + _Paths.DOWNLOAD;
+  static const SETTING_FUNCTIONS = _Paths.SETTING + _Paths.FUNCTIONS;
 }
 
 abstract class _Paths {
@@ -42,4 +43,5 @@ abstract class _Paths {
   static const SETTING = '/setting';
   static const ABOUT = '/about';
   static const DOWNLOAD = '/download';
+  static const FUNCTIONS = '/functions';
 }

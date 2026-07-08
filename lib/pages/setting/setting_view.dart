@@ -124,6 +124,11 @@ class SettingPage extends GetView<SettingController> {
                       icon: Icons.download_rounded,
                       onTap: () => Get.toNamed(Routes.SETTING_DOWNLOAD),
                     ),
+                    _buildListTile(
+                      title: '自定义函数',
+                      icon: CupertinoIcons.function,
+                      onTap: () => Get.toNamed(Routes.SETTING_FUNCTIONS),
+                    ),
                   ],
                 ),
               ),

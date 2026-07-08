@@ -81,6 +81,12 @@ class PluginRuntimeService extends GetxService {
       });
     });
 
+    // Inject custom functions
+    final customScript = CustomFunctionService.to.generateScript();
+    if (customScript.isNotEmpty) {
+      _runtime.evaluate(customScript);
+    }
+
     _evaluate(script);
     _runtime.evaluate("""
       var __DEUP_JS_CALLBACK_LIST__ = __NATIVE__.__DEUP_JS_CALLBACK_LIST__;
