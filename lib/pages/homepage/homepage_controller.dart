@@ -15,7 +15,7 @@ import 'package:deup/pages/detail/detail_view.dart';
 
 class HomepageController extends GetxController {
   final pluginList = <PluginEntity>[].obs;
-  final shortcutList = <ShortcutEntity>[].obs;
+  final shortcutList = <ShortcutModel>[].obs;
   final isFirstLoading = true.obs;
   final keyword = ''.obs;
 
@@ -41,7 +41,6 @@ class HomepageController extends GetxController {
     super.onClose();
   }
 
-  /// 获取插件列表
   Future<void> getPluginList() async {
     final _pluginList =
         await DatabaseService.to.database.pluginDao.findAllPlugin();
@@ -59,27 +58,22 @@ class HomepageController extends GetxController {
     pluginList.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
   }
 
-  /// 加载快捷入口
   Future<void> loadShortcuts() async {
-    shortcutList.value =
-        await DatabaseService.to.shortcutDao.findAllShortcut();
+    shortcutList.value = ShortcutService.to.getAll();
   }
 
-  /// 添加快捷入口
   Future<void> addShortcut({
     required PluginEntity plugin,
     ServerEntity? server,
   }) async {
     final config = PluginConfigModel.fromJson(json.decode(plugin.config));
-    final existing = await DatabaseService.to.shortcutDao
-        .findShortcutByPluginId(plugin.id);
-    if (server == null && existing.isNotEmpty) return;
-
+    final existing = ShortcutService.to.getAll();
+    if (server == null && existing.any((s) => s.pluginId == plugin.id)) return;
     if (server != null && existing.any((s) => s.serverId == server.id)) return;
 
-    final sortOrder = await DatabaseService.to.shortcutDao.getNextSortOrder();
-    await DatabaseService.to.shortcutDao.insertShortcut(
-      ShortcutEntity(
+    final sortOrder = ShortcutService.to.getNextSortOrder();
+    await ShortcutService.to.add(
+      ShortcutModel(
         id: CommonUtils.generateUuid(),
         pluginId: plugin.id,
         serverId: server?.id,
@@ -96,14 +90,12 @@ class HomepageController extends GetxController {
     await loadShortcuts();
   }
 
-  /// 删除快捷入口
   Future<void> removeShortcut(String id) async {
-    await DatabaseService.to.shortcutDao.deleteShortcutById(id);
+    await ShortcutService.to.remove(id);
     await loadShortcuts();
   }
 
-  /// 点击快捷入口
-  void onShortcutTap(ShortcutEntity shortcut) async {
+  void onShortcutTap(ShortcutModel shortcut) async {
     final plugin = await DatabaseService.to.database.pluginDao
         .findPluginById(shortcut.pluginId);
     if (plugin == null) {
@@ -121,7 +113,6 @@ class HomepageController extends GetxController {
     goDetailPage(plugin, server: server);
   }
 
-  /// 插件点击事件
   void onPluginTap(PluginEntity plugin) async {
     final config = PluginConfigModel.fromJson(json.decode(plugin.config));
 
@@ -267,7 +258,7 @@ class HomepageController extends GetxController {
     );
     if (ok != OkCancelResult.ok) return;
     await DatabaseService.to.database.pluginDao.deletePluginById(pluginId);
-    await DatabaseService.to.shortcutDao.deleteShortcutByPluginId(pluginId);
+    await ShortcutService.to.removeByPluginId(pluginId);
     await loadShortcuts();
     await getPluginList();
   }

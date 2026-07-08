@@ -9,7 +9,7 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:deup/common/index.dart';
 import 'package:deup/helper/index.dart';
 import 'package:deup/routes/app_pages.dart';
-import 'package:deup/database/entity/index.dart';
+import 'package:deup/models/index.dart';
 import 'package:deup/pages/homepage/homepage_controller.dart';
 import 'package:deup/pages/homepage/components/plugin_item_component.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -76,7 +76,7 @@ class Homepage extends GetView<HomepageController> {
     );
   }
 
-  Widget _buildShortcutIcon(ShortcutEntity shortcut) {
+  Widget _buildShortcutIcon(ShortcutModel shortcut) {
     final iconExt = shortcut.icon != null
         ? p.extension(shortcut.icon!).replaceAll('.', '').toLowerCase()
         : '';

@@ -149,7 +149,7 @@ class PluginController extends GetxController {
     );
     if (ok != OkCancelResult.ok) return;
     await serverDao.deleteServerById(serverId);
-    await DatabaseService.to.shortcutDao.deleteShortcutByServerId(serverId);
+    await ShortcutService.to.removeByServerId(serverId);
     final _database = DatabaseService.to.database;
     await _database.progressDao.deleteProgressByServerId(serverId);
     await _database.historyDao.deleteHistoryByServerId(serverId);
