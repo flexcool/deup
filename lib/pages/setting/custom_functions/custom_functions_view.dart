@@ -41,6 +41,74 @@ class CustomFunctionsPage extends GetView<CustomFunctionsController> {
       fullscreenDialog: true,
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      navigationBar: _buildNavigationBar(),
+      backgroundColor: CommonUtils.backgroundColor,
+      child: Obx(() {
+        if (controller.functions.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(CupertinoIcons.function, size: 60.r, color: Colors.grey),
+                SizedBox(height: 16.h),
+                Text('暂无自定义函数', style: Get.textTheme.bodyLarge?.copyWith(color: Colors.grey)),
+                SizedBox(height: 8.h),
+                Text('点击右上角 + 添加', style: Get.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+              ],
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: EdgeInsets.only(top: 12.h),
+          itemCount: controller.functions.length,
+          itemBuilder: (context, index) {
+            final func = controller.functions[index];
+            return CupertinoListTile(
+              title: Text(func.name, style: Get.textTheme.bodyLarge),
+              subtitle: Text(
+                func.code.length > 60 ? '${func.code.substring(0, 60)}...' : func.code,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Get.textTheme.bodySmall?.copyWith(
+                  color: Colors.grey,
+                  fontFamily: 'monospace',
+                  fontSize: 11.sp,
+                ),
+              ),
+              leading: Icon(CupertinoIcons.function, color: Get.theme.primaryColor),
+              trailing: CupertinoButton(
+                padding: EdgeInsets.zero,
+                child: Icon(CupertinoIcons.delete, size: 20.r, color: Colors.red),
+                onPressed: () async {
+                  final ok = await showOkCancelAlertDialog(
+                    context: Get.overlayContext!,
+                    title: '提示',
+                    message: '确定要删除「${func.name}」吗？',
+                    okLabel: '删除',
+                    cancelLabel: '取消',
+                    isDestructiveAction: true,
+                  );
+                  if (ok == OkCancelResult.ok) {
+                    await controller.deleteFunction(func.id);
+                  }
+                },
+              ),
+              onTap: () => _showEditorDialog(
+                id: func.id,
+                name: func.name,
+                code: func.code,
+              ),
+            );
+          },
+        );
+      }),
+    );
+  }
 }
 
 class _FunctionEditorPage extends StatefulWidget {
@@ -162,74 +230,6 @@ class _FunctionEditorPageState extends State<_FunctionEditorPage> {
           ),
         ),
       ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: _buildNavigationBar(),
-      backgroundColor: CommonUtils.backgroundColor,
-      child: Obx(() {
-        if (controller.functions.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(CupertinoIcons.function, size: 60.r, color: Colors.grey),
-                SizedBox(height: 16.h),
-                Text('暂无自定义函数', style: Get.textTheme.bodyLarge?.copyWith(color: Colors.grey)),
-                SizedBox(height: 8.h),
-                Text('点击右上角 + 添加', style: Get.textTheme.bodySmall?.copyWith(color: Colors.grey)),
-              ],
-            ),
-          );
-        }
-
-        return ListView.builder(
-          padding: EdgeInsets.only(top: 12.h),
-          itemCount: controller.functions.length,
-          itemBuilder: (context, index) {
-            final func = controller.functions[index];
-            return CupertinoListTile(
-              title: Text(func.name, style: Get.textTheme.bodyLarge),
-              subtitle: Text(
-                func.code.length > 60 ? '${func.code.substring(0, 60)}...' : func.code,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Get.textTheme.bodySmall?.copyWith(
-                  color: Colors.grey,
-                  fontFamily: 'monospace',
-                  fontSize: 11.sp,
-                ),
-              ),
-              leading: Icon(CupertinoIcons.function, color: Get.theme.primaryColor),
-              trailing: CupertinoButton(
-                padding: EdgeInsets.zero,
-                child: Icon(CupertinoIcons.delete, size: 20.r, color: Colors.red),
-                onPressed: () async {
-                  final ok = await showOkCancelAlertDialog(
-                    context: Get.overlayContext!,
-                    title: '提示',
-                    message: '确定要删除「${func.name}」吗？',
-                    okLabel: '删除',
-                    cancelLabel: '取消',
-                    isDestructiveAction: true,
-                  );
-                  if (ok == OkCancelResult.ok) {
-                    await controller.deleteFunction(func.id);
-                  }
-                },
-              ),
-              onTap: () => _showEditorDialog(
-                id: func.id,
-                name: func.name,
-                code: func.code,
-              ),
-            );
-          },
-        );
-      }),
     );
   }
 }
