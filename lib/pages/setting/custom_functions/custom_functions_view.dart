@@ -70,13 +70,15 @@ class CustomFunctionsPage extends GetView<CustomFunctionsController> {
                     ],
                   ),
                   SizedBox(height: 8.h),
-                  CupertinoTextField(
-                    controller: nameController,
-                    placeholder: '函数名称',
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                  Container(
                     decoration: BoxDecoration(
                       border: Border.all(color: CupertinoColors.systemGrey4),
                       borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: CupertinoTextField(
+                      controller: nameController,
+                      placeholder: '函数名称',
+                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
                     ),
                   ),
                   SizedBox(height: 16.h),
