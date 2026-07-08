@@ -34,7 +34,6 @@ class CustomFunctionsPage extends GetView<CustomFunctionsController> {
   Future<void> _showEditorDialog({String? id, String? name, String? code}) async {
     final nameController = TextEditingController(text: name ?? '');
     final codeController = TextEditingController(text: code ?? '');
-    final formKey = GlobalKey<FormState>();
 
     final result = await showModalBottomSheet<bool>(
       context: Get.overlayContext!,
@@ -44,9 +43,7 @@ class CustomFunctionsPage extends GetView<CustomFunctionsController> {
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          child: Form(
-            key: formKey,
-            child: SingleChildScrollView(
+          child: SingleChildScrollView(
               padding: EdgeInsets.all(16.w),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
