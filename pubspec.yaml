@@ -23,7 +23,7 @@ dependencies:
 
   get: ^4.6.5
   get_storage: ^2.0.3
-  dio: ^5.0.1
+  dio: ^5.10.0
   uuid: ^3.0.7
   path: ^1.8.2
   floor: ^1.4.2

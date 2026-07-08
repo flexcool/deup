@@ -37,7 +37,5 @@ class WebviewController extends GetxController {
     progress.value = p / 100;
   }
 
-  onConsoleMessage(controller, message) {
-    print(message);
-  }
+  onConsoleMessage(controller, message) {}
 }

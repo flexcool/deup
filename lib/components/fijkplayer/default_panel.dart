@@ -588,10 +588,6 @@ class _buildGestureDetectorState extends State<_buildGestureDetector> {
         _duration = value.duration;
       });
     }
-    print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++');
-    print('++++++++ 是否开始播放 => ${value.state == FijkState.started} ++++++++');
-    print('+++++++++++++++++++ 播放器状态 => ${value.state} ++++++++++++++++++++');
-    print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++');
     // 新状态
     bool playing = value.state == FijkState.started;
     bool prepared = value.prepared;
@@ -915,7 +911,6 @@ class _buildGestureDetectorState extends State<_buildGestureDetector> {
                                 onChangeEnd: (v) {
                                   setState(() {
                                     player.seekTo(v.toInt());
-                                    print("seek to $v");
                                     _currentPos = Duration(
                                         milliseconds: _seekPos.toInt());
                                     _seekPos = -1;
