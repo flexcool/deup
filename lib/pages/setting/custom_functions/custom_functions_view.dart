@@ -109,8 +109,7 @@ class CustomFunctionsPage extends GetView<CustomFunctionsController> {
                 ],
               ),
             ),
-          ),
-        );
+          );
       },
     );
 
