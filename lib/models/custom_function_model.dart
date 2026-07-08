@@ -84,6 +84,8 @@ class CustomFunctionService {
   String generateScript() {
     final functions = getAll();
     if (functions.isEmpty) return '';
-    return functions.map((f) => '${f.code}').join('\n\n');
+    return functions
+        .map((f) => '${f.code}\n\$custom.${f.name} = ${f.name};')
+        .join('\n\n');
   }
 }

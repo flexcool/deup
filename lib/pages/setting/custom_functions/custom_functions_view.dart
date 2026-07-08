@@ -89,7 +89,7 @@ class CustomFunctionsPage extends GetView<CustomFunctionsController> {
                     ),
                     child: CupertinoTextField(
                       controller: codeController,
-                      placeholder: 'function myFunc(args) {\n  // your code here\n  return args;\n}',
+                      placeholder: 'function myFunc(args) {\n  return args;\n}',
                       maxLines: null,
                       expands: true,
                       textAlignVertical: TextAlignVertical.top,
@@ -102,7 +102,7 @@ class CustomFunctionsPage extends GetView<CustomFunctionsController> {
                   ),
                   SizedBox(height: 12.h),
                   Text(
-                    '函数将以 function 形式注入到脚本上下文中，脚本中可直接调用。',
+                    '函数挂载在 \$custom 命名空间下，脚本中通过 \$custom.函数名() 调用。',
                     style: Get.textTheme.bodySmall?.copyWith(color: Colors.grey),
                   ),
                   SizedBox(height: 24.h),
