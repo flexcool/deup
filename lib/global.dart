@@ -10,6 +10,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:deup/services/index.dart';
 import 'package:deup/storages/index.dart';
 import 'package:deup/constants/index.dart';
+import 'package:deup/models/index.dart';
 
 // 全局配置
 class Global {
@@ -27,6 +28,9 @@ class Global {
 
     // GetStorage
     await GetStorage.init();
+
+    // Seed default custom functions
+    await CustomFunctionService.to.seedDefaults();
 
     // Storage
     await Get.put(CommonStorage());

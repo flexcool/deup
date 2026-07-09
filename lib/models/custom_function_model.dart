@@ -92,4 +92,18 @@ class CustomFunctionService {
   void clear() {
     _box.remove(_key);
   }
+
+  Future<void> seedDefaults() async {
+    final existing = getAll();
+    if (existing.any((f) => f.name == 'alert')) return;
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await add(CustomFunctionModel(
+      id: 'default_alert',
+      name: 'alert',
+      code: 'function alert(message) {\n  \$alert(message);\n}',
+      createdAt: now,
+      updatedAt: now,
+    ));
+  }
 }

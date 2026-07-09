@@ -205,7 +205,7 @@ class _FunctionEditorPageState extends State<_FunctionEditorPage> {
               Text('函数代码', style: Get.textTheme.bodySmall),
               SizedBox(height: 8.h),
               Container(
-                height: 400.h,
+                height: 640.h,
                 decoration: BoxDecoration(
                   border: Border.all(color: CupertinoColors.systemGrey4),
                   borderRadius: BorderRadius.circular(8.r),
