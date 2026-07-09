@@ -72,6 +72,9 @@ class PluginRuntimeService extends GetxService {
       var Base64 = __NATIVE__.Base64;
       if (typeof window.btoa !== 'function') window.btoa = Base64.btoa;
       if (typeof window.atob !== 'function') window.atob = Base64.atob;
+
+      // Custom functions namespace
+      var \$custom = {};
     """);
 
     // Alert
@@ -81,9 +84,8 @@ class PluginRuntimeService extends GetxService {
       });
     });
 
-    // Inject custom functions namespace
+    // Inject custom functions
     await CustomFunctionService.to.seedDefaults();
-    _runtime.evaluate('var \$custom = {};');
     final customScript = CustomFunctionService.to.generateScript();
     if (customScript.isNotEmpty) {
       _runtime.evaluate(customScript);
