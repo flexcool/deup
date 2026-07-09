@@ -9,7 +9,6 @@ class CustomFunctionsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    CustomFunctionService.to.markSeen();
     loadFunctions();
   }
 

@@ -39,14 +39,7 @@ class CustomFunctionService {
   CustomFunctionService._();
 
   static const _key = '__DEUP_CUSTOM_FUNCTIONS__';
-  static const _seenKey = '__DEUP_CUSTOM_FUNCTIONS_SEEN__';
   final _box = GetStorage();
-
-  bool get hasSeen => _box.read<bool>(_seenKey) == true;
-
-  void markSeen() {
-    _box.write(_seenKey, true);
-  }
 
   List<CustomFunctionModel> getAll() {
     final data = _box.read<List>(_key) ?? [];
@@ -98,21 +91,5 @@ class CustomFunctionService {
 
   void clear() {
     _box.remove(_key);
-  }
-
-  Future<void> seedDefaults() async {
-    if (hasSeen) return;
-
-    final existing = getAll();
-    if (existing.any((f) => f.name == 'alert')) return;
-
-    final now = DateTime.now().millisecondsSinceEpoch;
-    await add(CustomFunctionModel(
-      id: 'default_alert',
-      name: 'alert',
-      code: 'function alert(message) {\n  \$alert(message);\n}',
-      createdAt: now,
-      updatedAt: now,
-    ));
   }
 }
