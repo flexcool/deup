@@ -87,7 +87,6 @@ class PluginRuntimeService extends GetxService {
     });
 
     // Inject custom functions
-    await CustomFunctionService.to.seedDefaults();
     final customScript = CustomFunctionService.to.generateScript();
     if (customScript.isNotEmpty) {
       _runtime.evaluate(customScript);
