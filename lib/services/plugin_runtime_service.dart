@@ -74,7 +74,9 @@ class PluginRuntimeService extends GetxService {
       if (typeof window.atob !== 'function') window.atob = Base64.atob;
 
       // Custom functions namespace
-      var \$custom = {};
+      var \$custom = {
+        alert: function(message) { \$alert(message); }
+      };
     """);
 
     // Alert
