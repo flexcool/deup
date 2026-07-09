@@ -6,3 +6,4 @@ export 'deeplink_service.dart';
 export 'device_info_service.dart';
 export 'plugin_runtime_service.dart';
 export 'player_notification_service.dart';
+export 'backup_service.dart';

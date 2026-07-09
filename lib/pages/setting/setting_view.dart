@@ -199,6 +199,52 @@ class SettingPage extends GetView<SettingController> {
                 backgroundColor: CommonUtils.backgroundColor,
                 dividerMargin: 20,
                 additionalDividerMargin: 30,
+                header: Container(
+                  padding: EdgeInsets.only(left: 15),
+                  alignment: Alignment.centerLeft,
+                  child: Text('备份', style: Get.textTheme.bodySmall),
+                ),
+                footer: controller.includeStorage.value
+                    ? Container(
+                        padding: EdgeInsets.only(left: 15),
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          '导出时将对Storage数据进行软加密',
+                          style: Get.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                        ),
+                      )
+                    : null,
+                children: [
+                  _buildListTile(
+                    title: '导出备份',
+                    icon: Icons.file_upload_outlined,
+                    onTap: () => BackupService.to.exportBackup(
+                      includeStorage: controller.includeStorage.value,
+                    ),
+                  ),
+                  _buildListTile(
+                    title: '导入备份',
+                    icon: Icons.file_download_outlined,
+                    onTap: () => BackupService.to.importBackup(),
+                  ),
+                  _buildListTile(
+                    title: '导出内部Storage',
+                    icon: Icons.storage_rounded,
+                    trailing: Obx(
+                      () => CupertinoSwitch(
+                        value: controller.includeStorage.value,
+                        onChanged: (value) {
+                          controller.includeStorage.value = value;
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              CupertinoListSection.insetGrouped(
+                backgroundColor: CommonUtils.backgroundColor,
+                dividerMargin: 20,
+                additionalDividerMargin: 30,
                 children: [
                   _buildListTile(
                     title: '问题反馈',

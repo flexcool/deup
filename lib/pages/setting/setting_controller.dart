@@ -20,6 +20,9 @@ class SettingController extends GetxController {
   final isHardwareDecode =
       Get.find<PreferencesStorage>().isHardwareDecode.val.obs;
 
+  // 备份设置
+  final includeStorage = false.obs;
+
   // 主题
   final themeModeText = ''.obs;
   final InAppReview inAppReview = InAppReview.instance;
