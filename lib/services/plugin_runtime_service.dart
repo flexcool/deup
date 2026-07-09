@@ -82,6 +82,7 @@ class PluginRuntimeService extends GetxService {
     });
 
     // Inject custom functions namespace
+    await CustomFunctionService.to.seedDefaults();
     _runtime.evaluate('var \$custom = {};');
     final customScript = CustomFunctionService.to.generateScript();
     if (customScript.isNotEmpty) {
