@@ -74,7 +74,7 @@ class PluginRuntimeService extends GetxService {
       if (typeof window.atob !== 'function') window.atob = Base64.atob;
 
       // Custom functions namespace
-      var \$custom = {};
+      globalThis.\$custom = {};
     """);
 
     // Alert
@@ -84,11 +84,13 @@ class PluginRuntimeService extends GetxService {
       });
     });
 
-    // Inject custom functions into plugin script context
+    // Inject custom functions
     final customScript = CustomFunctionService.to.generateScript();
-    final fullScript = customScript.isNotEmpty ? '$customScript\n\n$script' : script;
+    if (customScript.isNotEmpty) {
+      _runtime.evaluate(customScript);
+    }
 
-    _evaluate(fullScript);
+    _evaluate(script);
     _runtime.evaluate("""
       var __DEUP_JS_CALLBACK_LIST__ = __NATIVE__.__DEUP_JS_CALLBACK_LIST__;
       var __DEUP_JS_PLUGIN_INSTANCE__ = __NATIVE__.__DEUP_JS_PLUGIN_INSTANCE__;
