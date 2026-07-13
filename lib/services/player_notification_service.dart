@@ -6,6 +6,7 @@ import 'package:fijkplayer/fijkplayer.dart';
 import 'package:audio_service/audio_service.dart';
 
 import 'package:deup/constants/index.dart';
+import 'package:deup/common/index.dart';
 import 'package:deup/pages/audio_player/audio_player_controller.dart';
 import 'package:deup/pages/video_player/video_player_controller.dart';
 
@@ -103,32 +104,36 @@ class PlayerNotificationHandler extends BaseAudioHandler
       _vp.currentIndex.value == 0
           ? _vp.changePlaylist(_vp.objects.length - 1)
           : _vp.changePlaylist(_vp.currentIndex.value - 1);
-    } catch (e) {}
-  }
-
-  @override
-  Future<void> skipToNext() async {
-    try {
-      if (!_isPlaylist!) return;
-
-      // Get the current video/audio player controller.
-      dynamic _vp = _isVideo ?? false
-          ? Get.find<VideoPlayerController>()
-          : Get.find<AudioPlayerController>();
-
-      // If the current play mode is shuffle, change the playlist to a random index.
-      final _playMode =
-          _isVideo ?? false ? _vp.playMode.val : _vp.playMode.value;
-      if (_playMode == PlayMode.SHUFFLE) {
-        _vp.changePlaylist(Random().nextInt(_vp.objects.length));
-        return;
+      } catch (e) {
+        CommonUtils.logger.e('skipToPrevious failed: $e');
       }
+    }
 
-      // Change the current index to the next index.
-      _vp.currentIndex.value == _vp.objects.length - 1
-          ? _vp.changePlaylist(0)
-          : _vp.changePlaylist(_vp.currentIndex.value + 1);
-    } catch (e) {}
+    @override
+    Future<void> skipToNext() async {
+      try {
+        if (!_isPlaylist!) return;
+
+        // Get the current video/audio player controller.
+        dynamic _vp = _isVideo ?? false
+            ? Get.find<VideoPlayerController>()
+            : Get.find<AudioPlayerController>();
+
+        // If the current play mode is shuffle, change the playlist to a random index.
+        final _playMode =
+            _isVideo ?? false ? _vp.playMode.val : _vp.playMode.value;
+        if (_playMode == PlayMode.SHUFFLE) {
+          _vp.changePlaylist(Random().nextInt(_vp.objects.length));
+          return;
+        }
+
+        // Change the current index to the next index.
+        _vp.currentIndex.value == _vp.objects.length - 1
+            ? _vp.changePlaylist(0)
+            : _vp.changePlaylist(_vp.currentIndex.value + 1);
+      } catch (e) {
+        CommonUtils.logger.e('skipToNext failed: $e');
+      }
   }
 
   /// Initialise our stream controller and start listening to fijkplayer events.

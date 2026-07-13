@@ -237,10 +237,7 @@ class Homepage extends GetView<HomepageController> {
                 color: Get.isDarkMode ? Colors.grey[500] : Colors.grey[600],
               ),
               style: TextStyle(fontSize: 18),
-              onChanged: (String value) {
-                controller.keyword.value = value;
-                controller.getPluginList();
-              },
+              onChanged: controller.onSearchChanged,
             ),
           ),
         ),

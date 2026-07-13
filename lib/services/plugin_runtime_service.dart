@@ -35,6 +35,7 @@ class PluginRuntimeService extends GetxService {
         .findPluginById(server?.pluginId ?? '');
 
     // Init runtime
+    _runtime.dispose();
     _runtime = getJavascriptRuntime();
     _runtime.evaluate("""
       var window = global = globalThis;
@@ -194,7 +195,7 @@ class PluginRuntimeService extends GetxService {
     try {
       final objects = await _return("""
         await __DEUP_JS_PLUGIN_INSTANCE__.search(
-          ${object == null ? 'null' : json.encode(object.toJson())}, `${keyword}`, ${offset}, ${limit}
+          ${object == null ? 'null' : json.encode(object.toJson())}, ${json.encode(keyword)}, ${offset}, ${limit}
         )
       """);
 
@@ -357,7 +358,7 @@ class PluginRuntimeService extends GetxService {
     try {
       String parameters = '__DEUP_JS_PLUGIN_INSTANCE__';
       args?.forEach((element) => parameters +=
-          ', ${element is num ? element : (element is String ? '`${element}`' : json.encode(element))}');
+          ', ${json.encode(element)}');
 
       await _evaluate("""
         __DEUP_JS_CALLBACK_LIST__[$callbackId].call($parameters);

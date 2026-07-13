@@ -71,7 +71,9 @@ class _AddServerComponentState extends State<AddServerComponent> {
       );
       _inputData.addAll(_oldInputData);
       _nameController.text = _server.name;
-    } catch (e) {}
+    } catch (e) {
+      CommonUtils.logger.e('Load server inputs failed: $e');
+    }
 
     setState(() {});
   }
@@ -102,7 +104,9 @@ class _AddServerComponentState extends State<AddServerComponent> {
           .set('__DEUP_INPUTS__', json.encode(_inputData));
 
       _checked = await PluginRuntimeService.to.check();
-    } catch (e) {}
+    } catch (e) {
+      CommonUtils.logger.e('Server validation failed: $e');
+    }
     SmartDialog.dismiss();
 
     if (!_checked) {

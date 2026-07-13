@@ -21,6 +21,8 @@ class HomepageController extends GetxController {
 
   final ScrollController scrollController = ScrollController();
 
+  Timer? _searchTimer;
+
   @override
   void onInit() async {
     super.onInit();
@@ -37,8 +39,15 @@ class HomepageController extends GetxController {
 
   @override
   void onClose() {
+    _searchTimer?.cancel();
     scrollController.dispose();
     super.onClose();
+  }
+
+  void onSearchChanged(String value) {
+    keyword.value = value;
+    _searchTimer?.cancel();
+    _searchTimer = Timer(const Duration(milliseconds: 300), getPluginList);
   }
 
   Future<void> getPluginList() async {
