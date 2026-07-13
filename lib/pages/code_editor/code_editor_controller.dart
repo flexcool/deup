@@ -87,7 +87,7 @@ class CodeEditorController extends GetxController {
       try {
         final config = await PluginRuntimeService.to.config;
         _addConsole('result',
-            '插件: ${config.name ?? '未命名'} (${config.layout?.name ?? '未知布局'})');
+            '插件: ${config.name ?? '未命名'} (布局: ${config.layout ?? '未知'})');
       } catch (e) {
         // class may not define config, that's ok
       }
