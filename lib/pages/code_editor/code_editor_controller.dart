@@ -11,27 +11,31 @@ import 'package:deup/common/index.dart';
 import 'package:deup/services/index.dart';
 import 'package:deup/database/entity/index.dart';
 import 'package:deup/pages/homepage/homepage_controller.dart';
+import 'package:deup/models/console_entry.dart';
 
 class CodeEditorController extends GetxController {
   final link = ''.obs;
-  final isLoading = true.obs; // 是否正在加载
+  final isLoading = true.obs;
+  final consoleOutput = <ConsoleEntry>[].obs;
+  final showConsole = false.obs;
+  final isRunning = false.obs;
 
   PluginEntity? plugin;
   late CodeController codeController;
   final FocusNode focusNode = FocusNode();
+  final FocusNode expressionFocusNode = FocusNode();
+  final TextEditingController expressionController = TextEditingController();
   final pluginDao = DatabaseService.to.database.pluginDao;
 
-  // Get arguments
   final String pluginId =
       Get.arguments != null ? Get.arguments['pluginId'] ?? '' : '';
 
   @override
   void onInit() async {
     plugin = await pluginDao.findPluginById(pluginId);
-    link.value = plugin?.link ?? ''; // 初始化关联链接
+    link.value = plugin?.link ?? '';
     if (plugin == null) focusNode.requestFocus();
 
-    // 初始化代码编辑器
     codeController = CodeController(
       text: plugin?.script ?? '',
       language: javascript,
@@ -41,7 +45,85 @@ class CodeEditorController extends GetxController {
     super.onInit();
   }
 
-  /// 保存插件
+  void toggleConsole() {
+    showConsole.value = !showConsole.value;
+  }
+
+  void clearConsole() {
+    consoleOutput.clear();
+  }
+
+  void _addConsole(String level, String message) {
+    consoleOutput.add(ConsoleEntry(level: level, message: message));
+  }
+
+  Future<void> runScript() async {
+    if (isRunning.value) return;
+    if (codeController.text.trim().isEmpty) {
+      _addConsole('error', '脚本为空');
+      showConsole.value = true;
+      return;
+    }
+
+    isRunning.value = true;
+    consoleOutput.clear();
+    showConsole.value = true;
+
+    try {
+      await PluginRuntimeService.to.initialize(
+        codeController.text,
+        onConsole: (level, message) => _addConsole(level, message),
+      );
+
+      // Run check() and show result
+      try {
+        final ok = await PluginRuntimeService.to.check();
+        _addConsole('result', 'check() → ${ok ? 'true' : 'false'}');
+      } catch (e) {
+        _addConsole('warn', 'check() 方法不存在或执行失败');
+      }
+
+      // Read config name
+      try {
+        final config = await PluginRuntimeService.to.config;
+        _addConsole('result',
+            '插件: ${config.name ?? '未命名'} (${config.layout?.name ?? '未知布局'})');
+      } catch (e) {
+        // class may not define config, that's ok
+      }
+
+      _addConsole('log', '脚本执行完成');
+    } catch (e) {
+      _addConsole('error', '脚本初始化失败: $e');
+    }
+
+    isRunning.value = false;
+  }
+
+  Future<void> evaluateExpression(String expression) async {
+    if (expression.trim().isEmpty) return;
+
+    try {
+      await PluginRuntimeService.to.initialize(
+        codeController.text,
+        onConsole: (level, message) => _addConsole(level, message),
+      );
+
+      final result = await PluginRuntimeService.to.evaluateExpression(expression);
+      _addConsole('result', '› $result');
+    } catch (e) {
+      _addConsole('error', '表达式错误: $e');
+    }
+  }
+
+  void onExpressionSubmitted() {
+    final expr = expressionController.text.trim();
+    if (expr.isNotEmpty) {
+      evaluateExpression(expr);
+      expressionController.clear();
+    }
+  }
+
   void save() async {
     try {
       final _now = DateTime.now().millisecondsSinceEpoch;
@@ -69,8 +151,6 @@ class CodeEditorController extends GetxController {
             ));
 
       SmartDialog.showToast('保存成功');
-
-      // 更新插件列表
       Get.find<HomepageController>().getPluginList();
       Get.back();
     } catch (e) {
@@ -78,9 +158,6 @@ class CodeEditorController extends GetxController {
     }
   }
 
-  /// 获取插件配置信息
-  ///
-  /// [script] 插件脚本
   Future<(String, String)> getPluginConfigAndInputs(String script) async {
     await PluginRuntimeService.to.initialize(script);
     final config = await PluginRuntimeService.to.config;
@@ -88,7 +165,6 @@ class CodeEditorController extends GetxController {
     return (json.encode(config), json.encode(inputs));
   }
 
-  /// 更新关联的链接
   Future<void> updateLink() async {
     final data = await showTextInputDialog(
       context: Get.context!,
@@ -108,7 +184,7 @@ class CodeEditorController extends GetxController {
       SmartDialog.showLoading(msg: '更新中...');
       final response = await DioService.to.dio.get(link.value);
       if (response.statusCode == 200) {
-        codeController.text = ''; // 清空代码
+        codeController.text = '';
         codeController.text = response.data;
       }
       SmartDialog.dismiss();
@@ -122,6 +198,8 @@ class CodeEditorController extends GetxController {
   @override
   void onClose() {
     focusNode.dispose();
+    expressionFocusNode.dispose();
+    expressionController.dispose();
     super.onClose();
   }
 }

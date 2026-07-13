@@ -29,7 +29,9 @@ class PluginRuntimeService extends GetxService {
   /// Init JavascriptRuntime
   ///
   /// [plugin] is the plugin that is using the runtime
-  Future<void> initialize(String script, {ServerEntity? server}) async {
+  Future<void> initialize(String script,
+      {ServerEntity? server,
+      void Function(String level, String message)? onConsole}) async {
     _server = server;
     _plugin = await DatabaseService.to.database.pluginDao
         .findPluginById(server?.pluginId ?? '');
@@ -81,7 +83,11 @@ class PluginRuntimeService extends GetxService {
     // Alert
     _runtime.onMessage('Deup.alert', (args) {
       Future.delayed(Duration(milliseconds: 200), () {
-        _showAlertDialog(args['message'].toString());
+        if (onConsole != null) {
+          onConsole('error', args['message'].toString());
+        } else {
+          _showAlertDialog(args['message'].toString());
+        }
       });
     });
 
@@ -89,6 +95,36 @@ class PluginRuntimeService extends GetxService {
     final customScript = CustomFunctionService.to.generateScript();
     if (customScript.isNotEmpty) {
       _runtime.evaluate(customScript);
+    }
+
+    // Console capture for preview mode
+    if (onConsole != null) {
+      _runtime.evaluate("""
+        var __deup_console_log__ = console.log;
+        var __deup_console_warn__ = console.warn;
+        var __deup_console_error__ = console.error;
+        console.log = function() {
+          var msg = Array.prototype.map.call(arguments, function(a) {
+            return typeof a === 'object' ? JSON.stringify(a) : String(a);
+          }).join(' ');
+          __deup_console_log__.apply(console, arguments);
+          sendMessage('Deup.ConsolePreview', JSON.stringify({level:'log', message:msg}));
+        };
+        console.warn = function() {
+          var msg = Array.prototype.map.call(arguments, function(a) {
+            return typeof a === 'object' ? JSON.stringify(a) : String(a);
+          }).join(' ');
+          __deup_console_warn__.apply(console, arguments);
+          sendMessage('Deup.ConsolePreview', JSON.stringify({level:'warn', message:msg}));
+        };
+        console.error = function() {
+          var msg = Array.prototype.map.call(arguments, function(a) {
+            return typeof a === 'object' ? JSON.stringify(a) : String(a);
+          }).join(' ');
+          __deup_console_error__.apply(console, arguments);
+          sendMessage('Deup.ConsolePreview', JSON.stringify({level:'error', message:msg}));
+        };
+      """);
     }
 
     _evaluate(script);
@@ -99,6 +135,13 @@ class PluginRuntimeService extends GetxService {
 
     _initStorageCallbacks();
     _initCookieCallbacks();
+
+    // Register console preview handler after init
+    if (onConsole != null) {
+      _runtime.onMessage('Deup.ConsolePreview', (args) {
+        onConsole(args['level'] as String? ?? 'log', args['message'] as String? ?? '');
+      });
+    }
   }
 
   /// Get config
@@ -321,6 +364,14 @@ class PluginRuntimeService extends GetxService {
     return GetPlatform.isAndroid
         ? _evaluate("""return JSON.stringify($script);""")
         : _evaluate("""return $script;""");
+  }
+
+  /// Evaluate a JS expression and return the result string.
+  ///
+  /// [expression] is any JavaScript expression
+  Future<String> evaluateExpression(String expression) async {
+    final result = await _return(expression);
+    return result.stringResult;
   }
 
   /// Evaluate Javascript

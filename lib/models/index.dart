@@ -6,3 +6,4 @@ export 'object.dart' ;
 export 'cookie_options.dart' ; 
 export 'shortcut_model.dart' ; 
 export 'custom_function_model.dart' ; 
+export 'console_entry.dart' ; 
