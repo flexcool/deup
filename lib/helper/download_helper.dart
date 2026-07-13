@@ -91,7 +91,7 @@ class DownloadHelper {
   static Future<bool> checkPermissionStorage() async {
     // Android 12 以上不需要申请存储权限
     if (GetPlatform.isAndroid &&
-        DeviceInfoService.to.androidInfo.version.sdkInt >= 33) {
+        (DeviceInfoService.to.androidInfo?.version.sdkInt ?? 0) >= 33) {
       return true;
     }
 
