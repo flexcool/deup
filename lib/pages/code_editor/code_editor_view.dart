@@ -201,7 +201,7 @@ class CodeEditorPage extends GetView<CodeEditorController> {
                 SizedBox(width: 10.w),
                 GestureDetector(
                   onTap: () => controller.onExpressionSubmitted(),
-                  child: Icon(CupertinoIcons.return_ios,
+                  child: Icon(CupertinoIcons.arrow_turn_up_right,
                       color: Colors.greenAccent, size: 40.sp),
                 ),
               ],
@@ -279,7 +279,7 @@ class CodeEditorPage extends GetView<CodeEditorController> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(CupertinoIcons.terminal,
+                              Icon(FontAwesomeIcons.terminal,
                                   color: Colors.white, size: 36.sp),
                               SizedBox(width: 8.w),
                               Text('控制台',
