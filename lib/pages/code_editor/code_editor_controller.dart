@@ -11,6 +11,8 @@ import 'package:deup/common/index.dart';
 import 'package:deup/services/index.dart';
 import 'package:deup/database/entity/index.dart';
 import 'package:deup/pages/homepage/homepage_controller.dart';
+import 'package:deup/pages/detail/detail_view.dart';
+import 'package:deup/routes/app_pages.dart';
 import 'package:deup/models/console_entry.dart';
 
 class CodeEditorController extends GetxController {
@@ -67,15 +69,44 @@ class CodeEditorController extends GetxController {
 
     isRunning.value = true;
     consoleOutput.clear();
-    showConsole.value = true;
+    ConsoleCapture.clear();
+
+    if (plugin == null) {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      plugin = PluginEntity(
+        id: CommonUtils.generateUuid(),
+        createdAt: now,
+        updatedAt: now,
+        config: '{}',
+        inputs: '{}',
+        link: link.value,
+        script: codeController.text,
+      );
+      await pluginDao.insertPlugin(plugin!);
+    }
 
     try {
+      final tempServer = ServerEntity(
+        id: CommonUtils.generateUuid(),
+        name: '脚本测试',
+        pluginId: plugin!.id,
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+        updatedAt: DateTime.now().millisecondsSinceEpoch,
+      );
+
       await PluginRuntimeService.to.initialize(
         codeController.text,
-        onConsole: (level, message) => _addConsole(level, message),
+        server: tempServer,
+        onConsole: (level, message) => ConsoleCapture.add(level, message),
+      );
+
+      Get.to(
+        () => DetailPage(),
+        routeName: '${Routes.DETAIL}',
+        arguments: {'fromEditor': true},
       );
     } catch (e) {
-      _addConsole('error', '脚本运行失败: $e');
+      ConsoleCapture.add('error', '脚本运行失败: $e');
     }
 
     isRunning.value = false;

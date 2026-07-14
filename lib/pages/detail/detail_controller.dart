@@ -9,6 +9,7 @@ import 'package:deup/database/entity/index.dart';
 class DetailController extends GetxController {
   final keyword = ''.obs;
   final layoutType = LayoutType.LIST.obs; // 布局方式
+  final showConsole = false.obs;
   final server = PluginRuntimeService.to.server!;
 
   // 获取参数
@@ -21,6 +22,14 @@ class DetailController extends GetxController {
   // 是否是历史记录
   bool history =
       Get.arguments != null ? Get.arguments['history'] ?? false : false;
+
+  // 是否从编辑器启动
+  bool fromEditor =
+      Get.arguments != null ? Get.arguments['fromEditor'] ?? false : false;
+
+  void toggleConsole() {
+    showConsole.value = !showConsole.value;
+  }
 
   @override
   void onInit() async {

@@ -8,6 +8,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:deup/common/index.dart';
 import 'package:deup/constants/index.dart';
 import 'package:deup/routes/app_pages.dart';
+import 'package:deup/models/index.dart';
 import 'package:deup/pages/detail/layouts/index.dart';
 import 'package:deup/pages/detail/detail_controller.dart';
 
@@ -44,6 +45,18 @@ class DetailPage extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
+            if (controller.fromEditor)
+              CupertinoButton(
+                onPressed: () => controller.toggleConsole(),
+                padding: EdgeInsets.zero,
+                alignment: Alignment.centerRight,
+                child: Obx(() => Icon(
+                  controller.showConsole.value
+                      ? Icons.keyboard_arrow_down
+                      : Icons.terminal,
+                  size: CommonUtils.isPad ? 22 : 65.sp,
+                )),
+              ),
             CupertinoButton(
               onPressed: () => controller.switchLayoutType(),
               padding: EdgeInsets.zero,
@@ -122,12 +135,96 @@ class DetailPage extends StatelessWidget {
     );
   }
 
+  Widget _buildConsoleOverlay() {
+    return Container(
+      height: 340.h,
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+            decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.white12)),
+            ),
+            child: Row(
+              children: [
+                Text('控制台',
+                    style: TextStyle(color: Colors.white70, fontSize: 28.sp)),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () => ConsoleCapture.clear(),
+                  child: Icon(Icons.delete_outline,
+                      color: Colors.white54, size: 40.sp),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Obx(() {
+              if (ConsoleCapture.entries.isEmpty) {
+                return Center(
+                  child: Text('无输出',
+                      style:
+                          TextStyle(color: Colors.white24, fontSize: 28.sp)),
+                );
+              }
+              return ListView.builder(
+                padding: EdgeInsets.all(8.w),
+                itemCount: ConsoleCapture.entries.length,
+                itemBuilder: (context, index) {
+                  final entry = ConsoleCapture.entries[index];
+                  Color color;
+                  switch (entry.level) {
+                    case 'error':
+                      color = const Color(0xFFFF5555);
+                      break;
+                    case 'warn':
+                      color = const Color(0xFFFFAA00);
+                      break;
+                    case 'result':
+                      color = const Color(0xFF55FF55);
+                      break;
+                    default:
+                      color = Colors.white70;
+                  }
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: 4.h),
+                    child: Text(
+                      entry.message,
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 24.sp,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  );
+                },
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return KeyboardDismissOnTap(
       child: Scaffold(
         appBar: _buildNavigationBar(),
-        body: Obx(() => _buildLayout()),
+        body: Column(
+          children: [
+            Expanded(child: Obx(() => _buildLayout())),
+            if (controller.fromEditor)
+              Obx(() {
+                if (!controller.showConsole.value) return SizedBox.shrink();
+                return _buildConsoleOverlay();
+              }),
+          ],
+        ),
         floatingActionButton: !controller.history && tag == null
             ? FloatingActionButton(
                 onPressed: () => Get.to(
