@@ -82,7 +82,6 @@ class CodeEditorController extends GetxController {
       Get.to(
         () => DetailPage(),
         routeName: '${Routes.DETAIL}',
-        arguments: {'fromEditor': true},
       );
     } catch (_) {} // errors shown via toast in PluginRuntimeService
 

@@ -24,8 +24,7 @@ class DetailController extends GetxController {
       Get.arguments != null ? Get.arguments['history'] ?? false : false;
 
   // 是否从编辑器启动
-  bool fromEditor =
-      Get.arguments != null ? Get.arguments['fromEditor'] ?? false : false;
+  bool get fromEditor => PluginRuntimeService.to.previewMode;
 
   void toggleConsole() {
     showConsole.value = !showConsole.value;

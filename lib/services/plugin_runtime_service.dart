@@ -26,6 +26,9 @@ class PluginRuntimeService extends GetxService {
   ServerEntity? _server;
   ServerEntity? get server => _server;
 
+  bool _previewMode = false;
+  bool get previewMode => _previewMode;
+
   /// Init JavascriptRuntime
   ///
   /// [plugin] is the plugin that is using the runtime
@@ -33,6 +36,7 @@ class PluginRuntimeService extends GetxService {
       {ServerEntity? server,
       void Function(String level, String message)? onConsole}) async {
     _server = server;
+    _previewMode = onConsole != null;
     _plugin = await DatabaseService.to.database.pluginDao
         .findPluginById(server?.pluginId ?? '');
 
