@@ -137,7 +137,7 @@ class DetailPage extends StatelessWidget {
 
   Widget _buildConsoleOverlay() {
     return Container(
-      height: 340.h,
+      height: 680.h,
       decoration: BoxDecoration(
         color: const Color(0xFF1E1E1E),
         borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
@@ -172,7 +172,7 @@ class DetailPage extends StatelessWidget {
               itemBuilder: (context, index) {
                 if (ConsoleCapture.entries.isEmpty) {
                   return SizedBox(
-                    height: 280.h,
+                    height: 620.h,
                     child: Center(
                       child: Text('无输出',
                           style: TextStyle(
