@@ -174,7 +174,7 @@ class DetailPage extends StatelessWidget {
                   return SizedBox(
                     height: 620.h,
                     child: Center(
-                      child: Text('无输出',
+                      child: SelectableText('无输出',
                           style: TextStyle(
                               color: Colors.white24, fontSize: 28.sp)),
                     ),
@@ -197,7 +197,7 @@ class DetailPage extends StatelessWidget {
                 }
                 return Padding(
                   padding: EdgeInsets.only(bottom: 4.h),
-                  child: Text(
+                  child: SelectableText(
                     entry.message,
                     style: TextStyle(
                       color: color,
