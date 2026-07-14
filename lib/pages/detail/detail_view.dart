@@ -163,47 +163,51 @@ class DetailPage extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Obx(() {
-              if (ConsoleCapture.entries.isEmpty) {
-                return Center(
-                  child: Text('无输出',
-                      style:
-                          TextStyle(color: Colors.white24, fontSize: 28.sp)),
-                );
-              }
-              return ListView.builder(
-                padding: EdgeInsets.all(8.w),
-                itemCount: ConsoleCapture.entries.length,
-                itemBuilder: (context, index) {
-                  final entry = ConsoleCapture.entries[index];
-                  Color color;
-                  switch (entry.level) {
-                    case 'error':
-                      color = const Color(0xFFFF5555);
-                      break;
-                    case 'warn':
-                      color = const Color(0xFFFFAA00);
-                      break;
-                    case 'result':
-                      color = const Color(0xFF55FF55);
-                      break;
-                    default:
-                      color = Colors.white70;
-                  }
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: 4.h),
-                    child: Text(
-                      entry.message,
-                      style: TextStyle(
-                        color: color,
-                        fontSize: 24.sp,
-                        fontFamily: 'monospace',
-                      ),
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.all(8.w),
+              itemCount: ConsoleCapture.entries.isEmpty
+                  ? 1
+                  : ConsoleCapture.entries.length,
+              itemBuilder: (context, index) {
+                if (ConsoleCapture.entries.isEmpty) {
+                  return SizedBox(
+                    height: 280.h,
+                    child: Center(
+                      child: Text('无输出',
+                          style: TextStyle(
+                              color: Colors.white24, fontSize: 28.sp)),
                     ),
                   );
-                },
-              );
-            }),
+                }
+                final entry = ConsoleCapture.entries[index];
+                Color color;
+                switch (entry.level) {
+                  case 'error':
+                    color = const Color(0xFFFF5555);
+                    break;
+                  case 'warn':
+                    color = const Color(0xFFFFAA00);
+                    break;
+                  case 'result':
+                    color = const Color(0xFF55FF55);
+                    break;
+                  default:
+                    color = Colors.white70;
+                }
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 4.h),
+                  child: Text(
+                    entry.message,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 24.sp,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),
