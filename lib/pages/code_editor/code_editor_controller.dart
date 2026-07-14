@@ -18,15 +18,11 @@ import 'package:deup/models/console_entry.dart';
 class CodeEditorController extends GetxController {
   final link = ''.obs;
   final isLoading = true.obs;
-  final consoleOutput = <ConsoleEntry>[].obs;
-  final showConsole = false.obs;
   final isRunning = false.obs;
 
   PluginEntity? plugin;
   late CodeController codeController;
   final FocusNode focusNode = FocusNode();
-  final FocusNode expressionFocusNode = FocusNode();
-  final TextEditingController expressionController = TextEditingController();
   final pluginDao = DatabaseService.to.database.pluginDao;
 
   final String pluginId =
@@ -47,28 +43,11 @@ class CodeEditorController extends GetxController {
     super.onInit();
   }
 
-  void toggleConsole() {
-    showConsole.value = !showConsole.value;
-  }
-
-  void clearConsole() {
-    consoleOutput.clear();
-  }
-
-  void _addConsole(String level, String message) {
-    consoleOutput.add(ConsoleEntry(level: level, message: message));
-  }
-
   Future<void> runScript() async {
     if (isRunning.value) return;
-    if (codeController.text.trim().isEmpty) {
-      _addConsole('error', '脚本为空');
-      showConsole.value = true;
-      return;
-    }
+    if (codeController.text.trim().isEmpty) return;
 
     isRunning.value = true;
-    consoleOutput.clear();
     ConsoleCapture.clear();
 
     if (plugin == null) {
@@ -105,35 +84,9 @@ class CodeEditorController extends GetxController {
         routeName: '${Routes.DETAIL}',
         arguments: {'fromEditor': true},
       );
-    } catch (e) {
-      ConsoleCapture.add('error', '脚本运行失败: $e');
-    }
+    } catch (_) {} // errors shown via toast in PluginRuntimeService
 
     isRunning.value = false;
-  }
-
-  Future<void> evaluateExpression(String expression) async {
-    if (expression.trim().isEmpty) return;
-
-    try {
-      await PluginRuntimeService.to.initialize(
-        codeController.text,
-        onConsole: (level, message) => _addConsole(level, message),
-      );
-
-      final result = await PluginRuntimeService.to.evaluateExpression(expression);
-      _addConsole('result', '› $result');
-    } catch (e) {
-      _addConsole('error', '表达式错误: $e');
-    }
-  }
-
-  void onExpressionSubmitted() {
-    final expr = expressionController.text.trim();
-    if (expr.isNotEmpty) {
-      evaluateExpression(expr);
-      expressionController.clear();
-    }
   }
 
   void save() async {
@@ -210,8 +163,6 @@ class CodeEditorController extends GetxController {
   @override
   void onClose() {
     focusNode.dispose();
-    expressionFocusNode.dispose();
-    expressionController.dispose();
     super.onClose();
   }
 }
