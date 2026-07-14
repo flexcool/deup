@@ -74,27 +74,8 @@ class CodeEditorController extends GetxController {
         codeController.text,
         onConsole: (level, message) => _addConsole(level, message),
       );
-
-      // Run check() and show result
-      try {
-        final ok = await PluginRuntimeService.to.check();
-        _addConsole('result', 'check() → ${ok ? 'true' : 'false'}');
-      } catch (e) {
-        _addConsole('warn', 'check() 方法不存在或执行失败');
-      }
-
-      // Read config name
-      try {
-        final config = await PluginRuntimeService.to.config;
-        _addConsole('result',
-            '插件: ${config.name ?? '未命名'} (布局: ${config.layout ?? '未知'})');
-      } catch (e) {
-        // class may not define config, that's ok
-      }
-
-      _addConsole('log', '脚本执行完成');
     } catch (e) {
-      _addConsole('error', '脚本初始化失败: $e');
+      _addConsole('error', '脚本运行失败: $e');
     }
 
     isRunning.value = false;
