@@ -108,7 +108,7 @@ class CodeEditorPage extends GetView<CodeEditorController> {
     return KeyboardDismissOnTap(
       child: CupertinoPageScaffold(
         navigationBar: _buildNavigationBar(),
-        child: SafeArea(child: _buildCodeField()),
+        child: SafeArea(child: Obx(() => _buildCodeField())),
       ),
     );
   }
