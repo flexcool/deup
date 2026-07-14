@@ -32,7 +32,7 @@ class DetailPage extends StatelessWidget {
             ? '历史记录'
             : controller.object?.name == null ||
                     controller.object!.name!.isEmpty
-                ? controller.server.name
+                ? (controller.server?.name ?? '测试')
                 : controller.object!.name!,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,

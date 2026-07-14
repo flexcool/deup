@@ -46,7 +46,7 @@ class _ImageLayoutState extends State<ImageLayout> {
   List<ObjectModel> objectList = [];
   ScrollController scrollController = ScrollController();
   TextEditingController searchController = TextEditingController();
-  final serverId = PluginRuntimeService.to.server!.id;
+  final serverId = PluginRuntimeService.to.server?.id ?? '';
 
   String keyword = '';
   String get id => widget.id;

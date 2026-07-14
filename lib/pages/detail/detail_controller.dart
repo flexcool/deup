@@ -10,7 +10,7 @@ class DetailController extends GetxController {
   final keyword = ''.obs;
   final layoutType = LayoutType.LIST.obs; // 布局方式
   final showConsole = false.obs;
-  final server = PluginRuntimeService.to.server!;
+  final ServerEntity? server = PluginRuntimeService.to.server;
 
   // 获取参数
   String id = Get.arguments != null ? Get.arguments['id'] ?? '' : '';

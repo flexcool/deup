@@ -65,17 +65,13 @@ class CodeEditorController extends GetxController {
     }
 
     try {
-      final tempServer = ServerEntity(
-        id: CommonUtils.generateUuid(),
-        name: '脚本测试',
-        pluginId: plugin!.id,
-        createdAt: DateTime.now().millisecondsSinceEpoch,
-        updatedAt: DateTime.now().millisecondsSinceEpoch,
-      );
+      final servers = await DatabaseService.to.database.serverDao
+          .findServerByPluginId(plugin!.id);
+      final testServer = servers.isNotEmpty ? servers.first : null;
 
       await PluginRuntimeService.to.initialize(
         codeController.text,
-        server: tempServer,
+        server: testServer,
         onConsole: (level, message) => ConsoleCapture.add(level, message),
       );
 

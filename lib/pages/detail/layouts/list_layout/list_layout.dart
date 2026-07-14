@@ -38,7 +38,7 @@ class ListLayout extends StatefulWidget {
 }
 
 class _ListLayoutState extends State<ListLayout> {
-  final serverId = PluginRuntimeService.to.server!.id;
+  final serverId = PluginRuntimeService.to.server?.id ?? '';
   ScrollController scrollController = ScrollController();
   TextEditingController searchController = TextEditingController();
   final PagingController<int, ObjectModel> pagingController =

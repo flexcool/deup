@@ -38,7 +38,7 @@ class GridLayout extends StatefulWidget {
 }
 
 class _GridLayoutState extends State<GridLayout> {
-  final serverId = PluginRuntimeService.to.server!.id;
+  final serverId = PluginRuntimeService.to.server?.id ?? '';
   ScrollController scrollController = ScrollController();
   TextEditingController searchController = TextEditingController();
   final PagingController<int, ObjectModel> pagingController =
