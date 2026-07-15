@@ -153,7 +153,25 @@ class DetailPage extends StatelessWidget {
               children: [
                 Text('控制台',
                     style: TextStyle(color: Colors.white70, fontSize: 28.sp)),
-                const Spacer(),
+                SizedBox(width: 16.w),
+                Expanded(
+                  child: CupertinoTextField(
+                    placeholder: '过滤...',
+                    placeholderStyle: TextStyle(
+                        color: Colors.white24, fontSize: 24.sp),
+                    style: TextStyle(
+                        color: Colors.white, fontSize: 24.sp),
+                    decoration: BoxDecoration(
+                      color: Colors.white12,
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    onChanged: (v) =>
+                        controller.consoleFilter.value = v,
+                  ),
+                ),
+                SizedBox(width: 12.w),
                 GestureDetector(
                   onTap: () => ConsoleCapture.clear(),
                   child: Icon(Icons.delete_outline,
@@ -163,55 +181,61 @@ class DetailPage extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.all(8.w),
-              itemCount: ConsoleCapture.entries.isEmpty
-                  ? 1
-                  : ConsoleCapture.entries.length,
-              itemBuilder: (context, index) {
-                if (ConsoleCapture.entries.isEmpty) {
-                  return SizedBox(
-                    height: 620.h,
-                    child: Center(
-                      child: SelectableText('无输出',
-                          style: TextStyle(
-                              color: Colors.white24, fontSize: 28.sp)),
+            child: Obx(() {
+              final filter = controller.consoleFilter.value;
+              final filtered = filter.isEmpty
+                  ? ConsoleCapture.entries
+                  : ConsoleCapture.entries
+                      .where((e) => e.message
+                          .toLowerCase()
+                          .contains(filter.toLowerCase()))
+                      .toList();
+              if (filtered.isEmpty) {
+                return Center(
+                  child: SelectableText(
+                      ConsoleCapture.entries.isEmpty ? '无输出' : '无匹配结果',
+                      style: TextStyle(
+                          color: Colors.white24, fontSize: 28.sp)),
+                );
+              }
+              return ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.all(8.w),
+                itemCount: filtered.length,
+                itemBuilder: (context, index) {
+                  final entry = filtered[index];
+                  Color color;
+                  switch (entry.level) {
+                    case 'error':
+                      color = const Color(0xFFFF5555);
+                      break;
+                    case 'warn':
+                      color = const Color(0xFFFFAA00);
+                      break;
+                    case 'result':
+                      color = const Color(0xFF55FF55);
+                      break;
+                    default:
+                      color = Colors.white70;
+                  }
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: 4.h),
+                    child: SelectableText(
+                      entry.message,
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 24.sp,
+                        fontFamily: 'monospace',
+                      ),
                     ),
                   );
-                }
-                final entry = ConsoleCapture.entries[index];
-                Color color;
-                switch (entry.level) {
-                  case 'error':
-                    color = const Color(0xFFFF5555);
-                    break;
-                  case 'warn':
-                    color = const Color(0xFFFFAA00);
-                    break;
-                  case 'result':
-                    color = const Color(0xFF55FF55);
-                    break;
-                  default:
-                    color = Colors.white70;
-                }
-                return Padding(
-                  padding: EdgeInsets.only(bottom: 4.h),
-                  child: SelectableText(
-                    entry.message,
-                    style: TextStyle(
-                      color: color,
-                      fontSize: 24.sp,
-                      fontFamily: 'monospace',
-                    ),
-                  ),
-                );
               },
-            ),
-          ),
-        ],
-      ),
-    );
+            );
+          }),
+        ),
+      ],
+    ),
+  );
   }
 
   @override
