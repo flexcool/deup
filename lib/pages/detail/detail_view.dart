@@ -178,6 +178,7 @@ class DetailPage extends StatelessWidget {
                           .toLowerCase()
                           .contains(filter.toLowerCase()))
                       .length;
+                  if (total == 0) return const SizedBox();
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -194,7 +195,7 @@ class DetailPage extends StatelessWidget {
                       ),
                       SizedBox(width: 8.w),
                       Text(
-                        '${(controller.consoleMatchIndex.value + 1).clamp(1, total)}/$total',
+                        '${controller.consoleMatchIndex.value + 1}/$total',
                         style: TextStyle(color: Colors.white38, fontSize: 22.sp),
                       ),
                     ],
