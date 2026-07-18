@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 
@@ -11,6 +12,8 @@ class DetailController extends GetxController {
   final layoutType = LayoutType.LIST.obs; // 布局方式
   final showConsole = false.obs;
   final consoleFilter = ''.obs;
+  final consoleMatchIndex = 0.obs;
+  final consoleScrollController = ScrollController();
   final ServerEntity? server = PluginRuntimeService.to.server;
 
   // 获取参数
@@ -29,6 +32,42 @@ class DetailController extends GetxController {
 
   void toggleConsole() {
     showConsole.value = !showConsole.value;
+  }
+
+  void onFilterChanged(String v) {
+    consoleFilter.value = v;
+    consoleMatchIndex.value = 0;
+  }
+
+  void nextMatch() {
+    final total = _matchCount;
+    if (total <= 1) return;
+    consoleMatchIndex.value = (consoleMatchIndex.value + 1) % total;
+    _scrollToCurrent();
+  }
+
+  void prevMatch() {
+    final total = _matchCount;
+    if (total <= 1) return;
+    consoleMatchIndex.value = (consoleMatchIndex.value - 1 + total) % total;
+    _scrollToCurrent();
+  }
+
+  int get _matchCount {
+    final filter = consoleFilter.value;
+    if (filter.isEmpty) return 0;
+    return ConsoleCapture.entries
+        .where((e) => e.message.toLowerCase().contains(filter.toLowerCase()))
+        .length;
+  }
+
+  void _scrollToCurrent() {
+    final idx = consoleMatchIndex.value;
+    final offset = idx * 32.h;
+    if (consoleScrollController.hasClients) {
+      consoleScrollController.animateTo(offset,
+          duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+    }
   }
 
   @override

@@ -167,10 +167,39 @@ class DetailPage extends StatelessWidget {
                     ),
                     padding:
                         EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                    onChanged: (v) =>
-                        controller.consoleFilter.value = v,
+                    onChanged: controller.onFilterChanged,
                   ),
                 ),
+                Obx(() {
+                  final filter = controller.consoleFilter.value;
+                  if (filter.isEmpty) return const SizedBox();
+                  final total = ConsoleCapture.entries
+                      .where((e) => e.message
+                          .toLowerCase()
+                          .contains(filter.toLowerCase()))
+                      .length;
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(width: 8.w),
+                      GestureDetector(
+                        onTap: controller.prevMatch,
+                        child: Icon(Icons.keyboard_arrow_up,
+                            color: Colors.white54, size: 32.sp),
+                      ),
+                      GestureDetector(
+                        onTap: controller.nextMatch,
+                        child: Icon(Icons.keyboard_arrow_down,
+                            color: Colors.white54, size: 32.sp),
+                      ),
+                      SizedBox(width: 8.w),
+                      Text(
+                        '${(controller.consoleMatchIndex.value + 1).clamp(1, total)}/$total',
+                        style: TextStyle(color: Colors.white38, fontSize: 22.sp),
+                      ),
+                    ],
+                  );
+                }),
                 SizedBox(width: 12.w),
                 GestureDetector(
                   onTap: () => ConsoleCapture.clear(),
@@ -199,6 +228,7 @@ class DetailPage extends StatelessWidget {
                 );
               }
               return ListView.builder(
+                controller: controller.consoleScrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.all(8.w),
                 itemCount: filtered.length,
@@ -218,12 +248,16 @@ class DetailPage extends StatelessWidget {
                     default:
                       color = Colors.white70;
                   }
-                  return Padding(
+                  final isMatch = index == controller.consoleMatchIndex.value;
+                  return Container(
+                    color: isMatch
+                        ? Colors.white.withOpacity(0.08)
+                        : null,
                     padding: EdgeInsets.only(bottom: 4.h),
-                    child: SelectableText(
-                      entry.message,
+                    child: SelectableText.rich(
+                      _buildHighlightedTextSpan(
+                          entry.message, filter, color),
                       style: TextStyle(
-                        color: color,
                         fontSize: 24.sp,
                         fontFamily: 'monospace',
                       ),
@@ -236,6 +270,38 @@ class DetailPage extends StatelessWidget {
       ],
     ),
   );
+  }
+
+  TextSpan _buildHighlightedTextSpan(
+      String text, String filter, Color color) {
+    if (filter.isEmpty) {
+      return TextSpan(text: text, style: TextStyle(color: color));
+    }
+    final lower = text.toLowerCase();
+    final filterLower = filter.toLowerCase();
+    final spans = <TextSpan>[];
+    int start = 0;
+    int idx;
+    while ((idx = lower.indexOf(filterLower, start)) != -1) {
+      if (idx > start) {
+        spans.add(TextSpan(
+            text: text.substring(start, idx),
+            style: TextStyle(color: color)));
+      }
+      spans.add(TextSpan(
+        text: text.substring(idx, idx + filter.length),
+        style: TextStyle(
+            color: Colors.black,
+            backgroundColor: const Color(0xFFFFEB3B)),
+      ));
+      start = idx + filter.length;
+    }
+    if (start < text.length) {
+      spans.add(TextSpan(
+          text: text.substring(start),
+          style: TextStyle(color: color)));
+    }
+    return TextSpan(children: spans);
   }
 
   @override
