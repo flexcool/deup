@@ -12,6 +12,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:deup/database/entity/index.dart';
 import 'package:deup/services/index.dart';
 import 'package:deup/models/index.dart';
+import 'package:deup/common/index.dart';
 
 class BackupService {
   static final BackupService _instance = BackupService._();
@@ -20,7 +21,7 @@ class BackupService {
 
   static const int _version = 1;
 
-  Future<void> exportBackup({bool includeStorage = false}) async {
+  Future<void> exportBackup({bool excludeStorage = false}) async {
     try {
       SmartDialog.showLoading(msg: '导出中...');
 
@@ -42,7 +43,8 @@ class BackupService {
         'shortcuts': shortcuts.map((e) => e.toJson()).toList(),
       };
 
-      if (includeStorage) {
+      // 默认导出完整 Storage（含参数值）；开启"不导出内部Storage"后跳过
+      if (!excludeStorage) {
         final storageList = <Map<String, dynamic>>[];
         for (final server in servers) {
           final storage = await DatabaseService.to.database.storageDao
@@ -99,6 +101,7 @@ class BackupService {
       final funcCount = (data['customFunctions'] as List?)?.length ?? 0;
       final shortcutCount = (data['shortcuts'] as List?)?.length ?? 0;
       final storageCount = (data['storage'] as List?)?.length ?? 0;
+      final inputCount = (data['inputs'] as List?)?.length ?? 0;
 
       SmartDialog.dismiss();
 
@@ -110,6 +113,7 @@ class BackupService {
             '• $serverCount 个服务器\n'
             '• $funcCount 个自定义函数\n'
             '• $shortcutCount 个快捷方式\n'
+            '${inputCount > 0 ? '• $inputCount 个参数值\n' : ''}'
             '${storageCount > 0 ? '• $storageCount 个Storage记录\n' : ''}'
             '\n已有数据将被覆盖，是否继续？',
         okLabel: '导入',
@@ -123,6 +127,9 @@ class BackupService {
       await _importServers(data['servers'] as List? ?? []);
       await _importCustomFunctions(data['customFunctions'] as List? ?? []);
       await _importShortcuts(data['shortcuts'] as List? ?? []);
+      if (data.containsKey('inputs')) {
+        await _importInputs(data['inputs'] as List? ?? []);
+      }
       if (data.containsKey('storage')) {
         await _importStorage(data['storage'] as List? ?? []);
       }
@@ -215,6 +222,16 @@ class BackupService {
       await ShortcutService.to.add(
         ShortcutModel.fromJson(Map<String, dynamic>.from(item)),
       );
+    }
+  }
+
+  Future<void> _importInputs(List<dynamic> list) async {
+    for (final item in list) {
+      final m = Map<String, dynamic>.from(item);
+      final serverId = m['server_id'] as String;
+      final data = m['data'];
+      if (data == null) continue;
+      await ServerStorage(serverId).set('__DEUP_INPUTS__', data);
     }
   }
 

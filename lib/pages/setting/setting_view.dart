@@ -204,12 +204,12 @@ class SettingPage extends GetView<SettingController> {
                   alignment: Alignment.centerLeft,
                   child: Text('备份', style: Get.textTheme.bodySmall),
                 ),
-                footer: controller.includeStorage.value
+                footer: controller.excludeStorage.value
                     ? Container(
                         padding: EdgeInsets.only(left: 15),
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          '导出时将对Storage数据进行软加密',
+                          '导出时将不包含内部Storage数据',
                           style: Get.textTheme.bodySmall?.copyWith(color: Colors.grey),
                         ),
                       )
@@ -219,7 +219,7 @@ class SettingPage extends GetView<SettingController> {
                     title: '导出备份',
                     icon: Icons.file_upload_outlined,
                     onTap: () => BackupService.to.exportBackup(
-                      includeStorage: controller.includeStorage.value,
+                      excludeStorage: controller.excludeStorage.value,
                     ),
                   ),
                   _buildListTile(
@@ -228,13 +228,13 @@ class SettingPage extends GetView<SettingController> {
                     onTap: () => BackupService.to.importBackup(),
                   ),
                   _buildListTile(
-                    title: '导出内部Storage',
+                    title: '不导出内部Storage',
                     icon: Icons.storage_rounded,
                     trailing: Obx(
                       () => CupertinoSwitch(
-                        value: controller.includeStorage.value,
+                        value: controller.excludeStorage.value,
                         onChanged: (value) {
-                          controller.includeStorage.value = value;
+                          controller.excludeStorage.value = value;
                         },
                       ),
                     ),

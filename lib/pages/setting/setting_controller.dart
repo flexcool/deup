@@ -21,7 +21,7 @@ class SettingController extends GetxController {
       Get.find<PreferencesStorage>().isHardwareDecode.val.obs;
 
   // 备份设置
-  final includeStorage = false.obs;
+  final excludeStorage = false.obs;
 
   // 主题
   final themeModeText = ''.obs;
